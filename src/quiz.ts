@@ -74,6 +74,12 @@ export function loadScore(): Score {
   return { correct: 0, total: 0, streak: 0, best: 0 };
 }
 
+export function resetScore(): Score {
+  const s: Score = { correct: 0, total: 0, streak: 0, best: 0 };
+  localStorage.setItem(SCORE_KEY, JSON.stringify(s));
+  return s;
+}
+
 export function recordAnswer(score: Score, correct: boolean): Score {
   const next: Score = {
     correct: score.correct + (correct ? 1 : 0),

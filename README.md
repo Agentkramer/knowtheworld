@@ -23,7 +23,8 @@ a quiz mode, four design themes and five languages (EN/DE/FR/IT/ES).
   to `public/flags/`
 - [`world-atlas`](https://github.com/topojson/world-atlas) — Natural Earth 110m
   country shapes, projected (Natural Earth projection) to SVG paths at build
-  time in `src/data/world-map.json`
+  time in `src/data/world-map.json`, in two variants: standard (0° center)
+  and pacific-centered (150°E) so Oceania zooms aren't split at the map edge
 
 Note: REST Countries was the original plan but shut down its free API in favor
 of a keyed v5 — the current pipeline has no API-key dependencies at all.
@@ -46,8 +47,15 @@ the dataset; they come from the browser's `Intl.DisplayNames` at runtime.
   Pages on every push to `main` (`DEPLOY_BASE` sets the Vite base path).
 - **Randomization**: shuffled deck (`src/deck.ts`) — every country appears once
   before any repeats; deck and seen-progress persist in `localStorage`.
+- **Map**: clickable — clicking a country jumps to it (hover shows its name);
+  a World/Continent/Region toggle zooms via a CSS transform on the
+  pre-projected SVG, picking whichever projection variant keeps the region
+  tightest. Countries too small for the 110m map aren't clickable (reachable
+  via search/neighbours); the marker dot covers them.
 - **Routing**: `#xyz` hash with the ISO cca3 code, so countries are linkable.
 - Keyboard: `Space` or `R` for the next random country.
+- The ↺ button next to the counter resets seen-progress (or the quiz score
+  when in quiz mode).
 
 ## Commands
 

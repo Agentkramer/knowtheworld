@@ -27,10 +27,17 @@ export interface Country {
   callingCode: string | null;
 }
 
-export interface WorldMap {
-  viewBox: string;
+export interface MapVariant {
   sphere: string;
   graticule: string;
   countries: { id: string; d: string }[];
   points: Record<string, [number, number]>;
+}
+
+export interface WorldMap {
+  viewBox: string;
+  width: number;
+  height: number;
+  standard: MapVariant;
+  pacific: MapVariant;
 }

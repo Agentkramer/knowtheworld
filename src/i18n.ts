@@ -31,6 +31,10 @@ interface UiStrings {
   wrong: string; // "{answer}" placeholder
   showCountry: string;
   streak: string;
+  reset: string;
+  zoomWorld: string;
+  zoomContinent: string;
+  zoomRegion: string;
 }
 
 export const STRINGS: Record<Lang, UiStrings> = {
@@ -63,6 +67,10 @@ export const STRINGS: Record<Lang, UiStrings> = {
     wrong: "Not quite — it's {answer}.",
     showCountry: "Show country",
     streak: "streak",
+    reset: "Reset counter",
+    zoomWorld: "World",
+    zoomContinent: "Continent",
+    zoomRegion: "Region",
   },
   de: {
     searchPlaceholder: "Land suchen…",
@@ -93,6 +101,10 @@ export const STRINGS: Record<Lang, UiStrings> = {
     wrong: "Leider nein – richtig ist {answer}.",
     showCountry: "Land ansehen",
     streak: "Serie",
+    reset: "Zähler zurücksetzen",
+    zoomWorld: "Welt",
+    zoomContinent: "Kontinent",
+    zoomRegion: "Region",
   },
   fr: {
     searchPlaceholder: "Rechercher un pays…",
@@ -123,6 +135,10 @@ export const STRINGS: Record<Lang, UiStrings> = {
     wrong: "Raté — c'était {answer}.",
     showCountry: "Voir le pays",
     streak: "série",
+    reset: "Réinitialiser le compteur",
+    zoomWorld: "Monde",
+    zoomContinent: "Continent",
+    zoomRegion: "Région",
   },
   it: {
     searchPlaceholder: "Cerca un paese…",
@@ -153,6 +169,10 @@ export const STRINGS: Record<Lang, UiStrings> = {
     wrong: "No — era {answer}.",
     showCountry: "Vedi il paese",
     streak: "serie",
+    reset: "Azzera il contatore",
+    zoomWorld: "Mondo",
+    zoomContinent: "Continente",
+    zoomRegion: "Regione",
   },
   es: {
     searchPlaceholder: "Buscar un país…",
@@ -183,6 +203,10 @@ export const STRINGS: Record<Lang, UiStrings> = {
     wrong: "No — era {answer}.",
     showCountry: "Ver el país",
     streak: "racha",
+    reset: "Reiniciar el contador",
+    zoomWorld: "Mundo",
+    zoomContinent: "Continente",
+    zoomRegion: "Región",
   },
 };
 

@@ -11,8 +11,8 @@ import worldMapJson from "./data/world-map.json";
 import type { Country, Lang, WorldMap } from "./types";
 import { LANGS, countryName, currencyNames, formatNumber, formatYear, languageNames, regionName, t } from "./i18n";
 import { Deck } from "./deck";
-import { MapView } from "./map";
-import { loadScore, makeQuestion, recordAnswer, type Question } from "./quiz";
+import { MapView, type ZoomLevel } from "./map";
+import { loadScore, makeQuestion, recordAnswer, resetScore, type Question } from "./quiz";
 
 const countries = countriesJson as unknown as Country[];
 const worldMap = worldMapJson as unknown as WorldMap;
@@ -20,7 +20,16 @@ const byCca3 = new Map(countries.map((c) => [c.cca3, c]));
 
 const LANG_KEY = "ktw-lang";
 const THEME_KEY = "ktw-theme";
+const ZOOM_KEY = "ktw-zoom";
 const THEMES = ["atlas", "swiss", "dark", "vintage"];
+const ZOOMS: ZoomLevel[] = ["world", "region", "subregion"];
+
+const byRegion = new Map<string, string[]>();
+const bySubregion = new Map<string, string[]>();
+for (const c of countries) {
+  byRegion.set(c.region, [...(byRegion.get(c.region) ?? []), c.cca3]);
+  if (c.subregion) bySubregion.set(c.subregion, [...(bySubregion.get(c.subregion) ?? []), c.cca3]);
+}
 
 // --- state ---------------------------------------------------------------
 
@@ -31,7 +40,13 @@ function initialLang(): Lang {
   return (LANGS as string[]).includes(nav) ? (nav as Lang) : "en";
 }
 
+function initialZoom(): ZoomLevel {
+  const stored = localStorage.getItem(ZOOM_KEY);
+  return stored && (ZOOMS as string[]).includes(stored) ? (stored as ZoomLevel) : "world";
+}
+
 let lang: Lang = initialLang();
+let zoomLevel: ZoomLevel = initialZoom();
 let current: Country | null = null;
 let mode: "explore" | "quiz" = "explore";
 let question: Question | null = null;
@@ -50,6 +65,7 @@ const randomBtn = document.getElementById("random-btn") as HTMLButtonElement;
 const randomLabel = document.getElementById("random-label")!;
 const modeBtn = document.getElementById("mode-btn") as HTMLButtonElement;
 const progressEl = document.getElementById("progress")!;
+const resetBtn = document.getElementById("reset-btn") as HTMLButtonElement;
 
 app.innerHTML = `
   <article class="country" id="country-view">
@@ -76,8 +92,52 @@ app.innerHTML = `
 
 const view = document.getElementById("country-view")!;
 const quizView = document.getElementById("quiz-view")!;
-const mapView = new MapView(document.getElementById("map-container")!, worldMap);
+const mapView = new MapView(document.getElementById("map-container")!, worldMap, {
+  interactive: true,
+  onSelect: (code) => show(code),
+  getName: (code) => {
+    const c = byCca3.get(code);
+    return c ? countryName(c, lang) : "";
+  },
+});
 const quizMap = new MapView(document.getElementById("q-map-container")!, worldMap);
+
+// zoom control overlay on the explore map
+const zoomCtrl = document.createElement("div");
+zoomCtrl.className = "map-zoom-ctrl";
+document.getElementById("map-container")!.appendChild(zoomCtrl);
+
+function renderZoomCtrl(): void {
+  const labels: Record<ZoomLevel, string> = {
+    world: t(lang, "zoomWorld"),
+    region: t(lang, "zoomContinent"),
+    subregion: t(lang, "zoomRegion"),
+  };
+  zoomCtrl.innerHTML = ZOOMS.map(
+    (z) =>
+      `<button type="button" data-zoom="${z}" class="${z === zoomLevel ? "active" : ""}">${labels[z]}</button>`,
+  ).join("");
+}
+
+zoomCtrl.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest("[data-zoom]");
+  if (!btn) return;
+  zoomLevel = btn.getAttribute("data-zoom") as ZoomLevel;
+  localStorage.setItem(ZOOM_KEY, zoomLevel);
+  renderZoomCtrl();
+  applyZoom();
+});
+
+function applyZoom(): void {
+  if (!current) return;
+  const members =
+    zoomLevel === "subregion" && current.subregion
+      ? (bySubregion.get(current.subregion) ?? [])
+      : zoomLevel !== "world"
+        ? (byRegion.get(current.region) ?? [])
+        : [];
+  mapView.setZoom(zoomLevel === "world" ? "world" : zoomLevel, members);
+}
 
 // --- rendering -----------------------------------------------------------
 
@@ -115,6 +175,7 @@ function render(c: Country): void {
   flag.alt = t(lang, "flagOf", { name });
 
   mapView.highlight(c.cca3);
+  applyZoom();
 
   const density =
     c.population && c.area ? `${formatNumber(lang, Math.round(c.population / c.area))} /km²` : null;
@@ -273,8 +334,21 @@ function applyStaticStrings(): void {
   randomLabel.textContent = t(lang, "random");
   langSelect.setAttribute("aria-label", t(lang, "language"));
   themeSelect.setAttribute("aria-label", t(lang, "theme"));
+  resetBtn.title = t(lang, "reset");
+  resetBtn.setAttribute("aria-label", t(lang, "reset"));
+  renderZoomCtrl();
   document.documentElement.lang = lang;
 }
+
+resetBtn.addEventListener("click", () => {
+  if (mode === "quiz") {
+    score = resetScore();
+  } else {
+    deck.reset();
+    if (current) deck.markSeen(current.cca3);
+  }
+  updateBar();
+});
 
 // --- navigation ----------------------------------------------------------
 

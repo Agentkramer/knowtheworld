@@ -59,6 +59,15 @@ export class Deck {
     localStorage.setItem(SEEN_KEY, JSON.stringify([...this.seen]));
   }
 
+  /** Clear progress and reshuffle for a fresh cycle. */
+  reset(): void {
+    this.seen = new Set();
+    this.order = shuffle(this.codes);
+    this.idx = -1;
+    localStorage.setItem(SEEN_KEY, "[]");
+    this.persist();
+  }
+
   get seenCount(): number {
     return this.seen.size;
   }
