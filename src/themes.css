@@ -1,0 +1,141 @@
+/* Theme token sets. Every color, font and shape decision lives here;
+   layout rules in style.css only consume the variables. */
+
+/* ---------- Atlas (flagship): warm editorial, serif display ---------- */
+
+:root,
+[data-theme="atlas"] {
+  --bg: #f5efe2;
+  --surface: #fdfaf1;
+  --ink: #221a0f;
+  --muted: #82755c;
+  --line: #e0d5bc;
+  --accent: #bc5127;
+
+  --font-display: "Fraunces Variable", Georgia, serif;
+  --font-body: "Inter Variable", system-ui, sans-serif;
+  --font-data: "Inter Variable", system-ui, sans-serif;
+  --display-weight: 580;
+  --display-tracking: -0.018em;
+
+  --radius: 18px;
+  --radius-s: 10px;
+  --border-width: 1px;
+  --shadow: 0 1px 2px rgba(60, 44, 16, 0.05), 0 10px 34px rgba(60, 44, 16, 0.08);
+  --stat-rule: 1px solid var(--line);
+
+  --map-water: #efe6d0;
+  --map-land: #dbcda9;
+  --map-outline: #f5efe2;
+  --map-grid: #e6dcc4;
+
+  --btn-bg: #221a0f;
+  --btn-ink: #f5efe2;
+}
+
+/* ---------- Swiss: stark grid, grotesk, hard edges ---------- */
+
+[data-theme="swiss"] {
+  --bg: #f1f0ec;
+  --surface: #ffffff;
+  --ink: #111111;
+  --muted: #707070;
+  --line: #111111;
+  --accent: #e8322a;
+
+  --font-display: "Space Grotesk Variable", "Inter Variable", sans-serif;
+  --font-body: "Inter Variable", system-ui, sans-serif;
+  --font-data: "Space Grotesk Variable", sans-serif;
+  --display-weight: 660;
+  --display-tracking: -0.035em;
+  --display-case: uppercase;
+  --brand-case: uppercase;
+  --brand-tracking: 0.04em;
+
+  --radius: 0px;
+  --radius-s: 0px;
+  --border-width: 2px;
+  --shadow: none;
+  --stat-rule: 2px solid var(--ink);
+
+  --map-water: #ffffff;
+  --map-land: #d9d7d0;
+  --map-outline: #f1f0ec;
+  --map-grid: #eceae4;
+
+  --btn-bg: #e8322a;
+  --btn-ink: #ffffff;
+}
+
+/* ---------- Nocturne: dark, luminous accent ---------- */
+
+[data-theme="dark"] {
+  --bg: #0c1016;
+  --surface: #141b25;
+  --ink: #e9edf4;
+  --muted: #8b95a7;
+  --line: #26303f;
+  --accent: #ffc94d;
+
+  --font-display: "Space Grotesk Variable", "Inter Variable", sans-serif;
+  --font-body: "Inter Variable", system-ui, sans-serif;
+  --font-data: "IBM Plex Mono", monospace;
+  --display-weight: 620;
+  --display-tracking: -0.025em;
+
+  --radius: 16px;
+  --radius-s: 9px;
+  --border-width: 1px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 40px rgba(0, 0, 0, 0.45);
+  --stat-rule: 1px solid var(--line);
+
+  --map-water: #101722;
+  --map-land: #2a3547;
+  --map-outline: #0c1016;
+  --map-grid: #1a2330;
+
+  --btn-bg: #ffc94d;
+  --btn-ink: #14100a;
+
+  color-scheme: dark;
+}
+
+/* ---------- Vintage: old-atlas sepia ---------- */
+
+[data-theme="vintage"] {
+  --bg: #eadfc6;
+  --surface: #f4ead2;
+  --ink: #3d2f1c;
+  --muted: #8c7a58;
+  --line: #c9b888;
+  --accent: #8a5a33;
+
+  --font-display: "Fraunces Variable", Georgia, serif;
+  --font-body: "Fraunces Variable", Georgia, serif;
+  --font-data: "Fraunces Variable", Georgia, serif;
+  --display-weight: 640;
+  --display-tracking: 0;
+
+  --radius: 6px;
+  --radius-s: 5px;
+  --border-width: 1px;
+  --shadow: 0 1px 0 rgba(61, 47, 28, 0.12), 0 8px 26px rgba(61, 47, 28, 0.14);
+  --stat-rule: 3px double var(--line);
+
+  --map-water: #e3d6b8;
+  --map-land: #cbb98e;
+  --map-outline: #eadfc6;
+  --map-grid: #d8c9a5;
+
+  --btn-bg: #3d2f1c;
+  --btn-ink: #eadfc6;
+}
+
+/* Vintage: engraved double-border card treatment */
+
+[data-theme="vintage"] .flag-card,
+[data-theme="vintage"] .map-card {
+  border: 1px solid var(--ink);
+  outline: 1px solid var(--ink);
+  outline-offset: 3px;
+}
