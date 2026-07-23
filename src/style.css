@@ -257,6 +257,9 @@ main {
 .map-zoom-wrap {
   transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: 0 0;
+  /* Spec default for SVG, but WebKit adopted it later than Gecko/Blink —
+     stating it explicitly keeps the zoom origin identical across browsers. */
+  transform-box: view-box;
 }
 
 .world-map.clickable .map-country {

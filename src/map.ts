@@ -29,15 +29,11 @@ export class MapView {
   private width: number;
   private height: number;
   private k = 1;
-  private cx: number;
-  private cy: number;
   private tooltip: HTMLDivElement | null = null;
 
   constructor(container: HTMLElement, map: WorldMap, opts: MapOptions = {}) {
     this.width = map.width;
     this.height = map.height;
-    this.cx = map.width / 2;
-    this.cy = map.height / 2;
 
     const svg = document.createElementNS(SVG_NS, "svg");
     svg.setAttribute("viewBox", map.viewBox);
@@ -72,12 +68,18 @@ export class MapView {
     this.layers = { standard: buildLayer(map.standard), pacific: buildLayer(map.pacific) };
     this.layers.pacific.g.setAttribute("visibility", "hidden");
 
+    // The marker lives *inside* the zoom wrapper so it is subject to exactly
+    // the same transform as the map geometry — never a second, hand-rolled
+    // copy of it. Browsers differ in how they resolve a CSS transform on an
+    // SVG element (px against user units vs. CSS pixels, transform-origin
+    // reference box); riding along makes the dot immune to all of that.
+    // Its own scale(1/k) keeps it at a constant apparent size.
     this.marker = document.createElementNS(SVG_NS, "g");
     this.marker.setAttribute("class", "map-marker");
     this.marker.innerHTML =
       '<circle class="map-marker-ring" r="14"/><circle class="map-marker-dot" r="5"/>';
     this.marker.style.display = "none";
-    svg.appendChild(this.marker);
+    this.zoomWrap.appendChild(this.marker);
 
     container.appendChild(svg);
 
@@ -196,8 +198,6 @@ export class MapView {
 
   private applyTransform(k: number, cx: number, cy: number): void {
     this.k = k;
-    this.cx = cx;
-    this.cy = cy;
     const tx = this.width / 2 - k * cx;
     const ty = this.height / 2 - k * cy;
     this.zoomWrap.style.transform = `translate(${tx}px, ${ty}px) scale(${k})`;
@@ -210,15 +210,10 @@ export class MapView {
       this.marker.style.display = "none";
       return;
     }
-    // The marker sits outside the zoom wrapper so it keeps its size;
-    // apply the zoom transform to its position manually.
-    const x = this.width / 2 + this.k * (pt[0] - this.cx);
-    const y = this.height / 2 + this.k * (pt[1] - this.cy);
-    if (x < -20 || x > this.width + 20 || y < -20 || y > this.height + 20) {
-      this.marker.style.display = "none";
-      return;
-    }
     this.marker.style.display = "";
-    this.marker.setAttribute("transform", `translate(${x} ${y})`);
+    // Plain SVG user units + a unitless counter-scale: no unit or
+    // reference-box ambiguity, so every browser agrees. Anything scrolled
+    // out of frame is clipped by the SVG viewport.
+    this.marker.setAttribute("transform", `translate(${pt[0]} ${pt[1]}) scale(${1 / this.k})`);
   }
 }
