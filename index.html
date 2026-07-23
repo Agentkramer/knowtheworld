@@ -9,66 +9,74 @@
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="#" id="brand">
-        <span class="brand-mark" aria-hidden="true"></span>
-        <span class="brand-name">Know the World</span>
-      </a>
-      <div class="controls">
-        <div class="search" id="search-box">
-          <input
-            id="search-input"
-            type="search"
-            autocomplete="off"
-            spellcheck="false"
-            placeholder="Search a country…"
-            aria-label="Search a country"
-          />
-          <ul id="search-results" hidden></ul>
+      <div class="masthead">
+        <a class="brand" href="#" id="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-name">Know the World</span>
+        </a>
+        <p class="intro" id="intro"></p>
+      </div>
+
+      <div class="header-right">
+        <div class="controls">
+          <div class="search" id="search-box">
+            <input
+              id="search-input"
+              type="search"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Search a country…"
+              aria-label="Search a country"
+            />
+            <ul id="search-results" hidden></ul>
+          </div>
+          <div class="picker" id="lang-picker">
+            <button type="button" id="lang-button" class="picker-button" aria-haspopup="listbox" aria-expanded="false">
+              <img id="lang-flag" alt="" />
+              <span id="lang-code">EN</span>
+              <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2.5 4.5 6 8l3.5-3.5" />
+              </svg>
+            </button>
+            <ul id="lang-menu" class="picker-menu" role="listbox" hidden></ul>
+          </div>
+          <div class="picker" id="theme-picker">
+            <button type="button" id="theme-button" class="picker-button" aria-haspopup="listbox" aria-expanded="false">
+              <span class="swatch" id="theme-swatch" aria-hidden="true"></span>
+              <span id="theme-name">Atlas</span>
+              <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2.5 4.5 6 8l3.5-3.5" />
+              </svg>
+            </button>
+            <ul id="theme-menu" class="picker-menu" role="listbox" hidden></ul>
+          </div>
         </div>
-        <div class="lang-picker" id="lang-picker">
-          <button type="button" id="lang-button" class="lang-button" aria-haspopup="listbox" aria-expanded="false">
-            <img id="lang-flag" alt="" />
-            <span id="lang-code">EN</span>
-            <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M2.5 4.5 6 8l3.5-3.5" />
+
+        <nav class="toolbar" id="toolbar">
+          <div class="mode-switch" id="mode-switch"></div>
+          <button id="random-btn" class="random-btn" type="button">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+              <rect x="3.5" y="3.5" width="17" height="17" rx="4"/>
+              <circle cx="8.6" cy="8.6" r="1.4" fill="currentColor" stroke="none"/>
+              <circle cx="15.4" cy="8.6" r="1.4" fill="currentColor" stroke="none"/>
+              <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/>
+              <circle cx="8.6" cy="15.4" r="1.4" fill="currentColor" stroke="none"/>
+              <circle cx="15.4" cy="15.4" r="1.4" fill="currentColor" stroke="none"/>
             </svg>
+            <span id="random-label">Surprise me</span>
           </button>
-          <ul id="lang-menu" role="listbox" hidden></ul>
-        </div>
-        <select id="theme-select" aria-label="Theme">
-          <option value="atlas">Atlas</option>
-          <option value="swiss">Swiss</option>
-          <option value="dark">Nocturne</option>
-          <option value="vintage">Vintage</option>
-        </select>
+          <p class="progress">
+            <span id="progress"></span>
+            <button id="reset-btn" class="reset-btn" type="button" aria-label="Reset">
+              <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/>
+                <path d="M3.5 3.5v5h5"/>
+              </svg>
+            </button>
+          </p>
+        </nav>
       </div>
     </header>
-
-    <nav class="toolbar" id="toolbar">
-      <div class="bar-buttons">
-        <button id="random-btn" class="random-btn" type="button">
-          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
-            <rect x="3.5" y="3.5" width="17" height="17" rx="4"/>
-            <circle cx="8.6" cy="8.6" r="1.4" fill="currentColor" stroke="none"/>
-            <circle cx="15.4" cy="8.6" r="1.4" fill="currentColor" stroke="none"/>
-            <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/>
-            <circle cx="8.6" cy="15.4" r="1.4" fill="currentColor" stroke="none"/>
-            <circle cx="15.4" cy="15.4" r="1.4" fill="currentColor" stroke="none"/>
-          </svg>
-          <span id="random-label">Surprise me</span>
-        </button>
-        <div class="mode-switch" id="mode-switch"></div>
-      </div>
-      <p class="progress">
-        <span id="progress"></span>
-        <button id="reset-btn" class="reset-btn" type="button" aria-label="Reset">
-          <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/>
-            <path d="M3.5 3.5v5h5"/>
-          </svg>
-        </button>
-      </p>
-    </nav>
 
     <main id="app"></main>
 

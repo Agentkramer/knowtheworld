@@ -40,6 +40,8 @@ interface UiStrings {
   allRegions: string;
   imprint: string;
   privacy: string;
+  intro: string;
+  score: string;
 }
 
 export const STRINGS: Record<Lang, UiStrings> = {
@@ -81,6 +83,9 @@ export const STRINGS: Record<Lang, UiStrings> = {
     allRegions: "All",
     imprint: "Imprint",
     privacy: "Privacy",
+    intro:
+      "Every visit shows a random country — flag, capital and where it sits on the map. Browse the full list or test yourself in the quiz.",
+    score: "Score",
   },
   de: {
     searchPlaceholder: "Land suchen…",
@@ -120,6 +125,9 @@ export const STRINGS: Record<Lang, UiStrings> = {
     allRegions: "Alle",
     imprint: "Impressum",
     privacy: "Datenschutz",
+    intro:
+      "Jeder Besuch zeigt ein zufälliges Land — mit Flagge, Hauptstadt und Lage auf der Karte. Stöbere in der Liste oder teste dich im Quiz.",
+    score: "Punkte",
   },
   fr: {
     searchPlaceholder: "Rechercher un pays…",
@@ -159,6 +167,9 @@ export const STRINGS: Record<Lang, UiStrings> = {
     allRegions: "Tous",
     imprint: "Mentions légales",
     privacy: "Confidentialité",
+    intro:
+      "Chaque visite affiche un pays au hasard — drapeau, capitale et position sur la carte. Parcourez la liste ou testez-vous au quiz.",
+    score: "Score",
   },
   it: {
     searchPlaceholder: "Cerca un paese…",
@@ -198,6 +209,9 @@ export const STRINGS: Record<Lang, UiStrings> = {
     allRegions: "Tutti",
     imprint: "Note legali",
     privacy: "Privacy",
+    intro:
+      "Ogni visita mostra un paese a caso — bandiera, capitale e posizione sulla mappa. Sfoglia l'elenco o mettiti alla prova con il quiz.",
+    score: "Punteggio",
   },
   es: {
     searchPlaceholder: "Buscar un país…",
@@ -237,6 +251,9 @@ export const STRINGS: Record<Lang, UiStrings> = {
     allRegions: "Todos",
     imprint: "Aviso legal",
     privacy: "Privacidad",
+    intro:
+      "Cada visita muestra un país al azar — bandera, capital y su lugar en el mapa. Explora la lista o ponte a prueba con el quiz.",
+    score: "Puntuación",
   },
 };
 

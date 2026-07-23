@@ -32,7 +32,15 @@ const byCca3 = new Map(countries.map((c) => [c.cca3, c]));
 const LANG_KEY = "ktw-lang";
 const THEME_KEY = "ktw-theme";
 const ZOOM_KEY = "ktw-zoom";
-const THEMES = ["atlas", "swiss", "dark", "vintage"];
+// Swatch colours mirror the tokens in themes.css; keep them in sync when a
+// theme's palette changes.
+const THEME_META: { id: string; label: string; bg: string; ink: string; accent: string }[] = [
+  { id: "atlas", label: "Atlas", bg: "#f5efe2", ink: "#221a0f", accent: "#bc5127" },
+  { id: "swiss", label: "Swiss", bg: "#f1f0ec", ink: "#111111", accent: "#e8322a" },
+  { id: "dark", label: "Nocturne", bg: "#0c1016", ink: "#e9edf4", accent: "#ffc94d" },
+  { id: "vintage", label: "Vintage", bg: "#eadfc6", ink: "#3d2f1c", accent: "#8a5a33" },
+];
+const THEMES = THEME_META.map((t) => t.id);
 const ZOOMS: ZoomLevel[] = ["world", "region", "subregion"];
 
 const byRegion = new Map<string, string[]>();
@@ -74,7 +82,9 @@ const searchResults = document.getElementById("search-results") as HTMLUListElem
 const langPicker = document.getElementById("lang-picker")!;
 const langButton = document.getElementById("lang-button") as HTMLButtonElement;
 const langMenu = document.getElementById("lang-menu") as HTMLUListElement;
-const themeSelect = document.getElementById("theme-select") as HTMLSelectElement;
+const themePicker = document.getElementById("theme-picker")!;
+const themeButton = document.getElementById("theme-button") as HTMLButtonElement;
+const themeMenu = document.getElementById("theme-menu") as HTMLUListElement;
 const randomBtn = document.getElementById("random-btn") as HTMLButtonElement;
 const randomLabel = document.getElementById("random-label")!;
 const modeSwitch = document.getElementById("mode-switch")!;
@@ -101,6 +111,23 @@ app.innerHTML = `
     </div>
     <div class="quiz-options" id="q-options"></div>
     <p class="quiz-feedback" id="q-feedback"></p>
+    <div class="quiz-footer">
+      <button id="q-next" class="random-btn" type="button">
+        <span id="q-next-label"></span>
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h13M12.5 6l6 6-6 6" />
+        </svg>
+      </button>
+      <p class="progress quiz-score">
+        <span id="q-score"></span>
+        <button id="q-reset" class="reset-btn" type="button">
+          <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/>
+            <path d="M3.5 3.5v5h5"/>
+          </svg>
+        </button>
+      </p>
+    </div>
   </section>
   <section class="list-view" id="list-view" hidden>
     <div class="list-filter" id="list-filter"></div>
@@ -241,14 +268,23 @@ function render(c: Country): void {
 }
 
 function updateBar(): void {
-  randomLabel.textContent = mode === "quiz" ? t(lang, "next") : t(lang, "random");
-  if (mode === "quiz") {
-    const streak = score.streak > 1 ? ` · 🔥 ${score.streak}` : "";
-    progressEl.textContent = `✓ ${score.correct} / ${score.total}${streak}`;
-  } else {
-    progressEl.textContent = t(lang, "seen", { n: deck.seenCount, total: deck.total });
-  }
+  // One position, one meaning: the toolbar always talks about countries seen,
+  // and "Surprise me" always means "random country" — so it steps aside in the
+  // quiz, which brings its own Next button and score.
+  randomLabel.textContent = t(lang, "random");
+  randomBtn.hidden = mode === "quiz";
+  progressEl.textContent = t(lang, "seen", { n: deck.seenCount, total: deck.total });
   renderModeSwitch();
+}
+
+function updateQuizFooter(): void {
+  document.getElementById("q-next-label")!.textContent = t(lang, "next");
+  const streak = score.streak > 1 ? ` · 🔥 ${score.streak}` : "";
+  document.getElementById("q-score")!.textContent =
+    `✓ ${score.correct} / ${score.total}${streak}`;
+  const reset = document.getElementById("q-reset")!;
+  reset.setAttribute("title", t(lang, "reset"));
+  reset.setAttribute("aria-label", t(lang, "reset"));
 }
 
 function renderModeSwitch(): void {
@@ -393,6 +429,7 @@ function renderQuestion(fresh: boolean): void {
     .join("");
   document.getElementById("q-feedback")!.innerHTML = "";
   updateBar();
+  updateQuizFooter();
 
   quizView.classList.remove("enter");
   void (quizView as HTMLElement).offsetWidth;
@@ -423,6 +460,7 @@ function answerQuestion(idx: number): void {
       isCorrect ? t(lang, "correct") : t(lang, "wrong", { answer: answerLabel }),
     )}</span> <a href="#${q.answer.cca3.toLowerCase()}" class="goto-country">${esc(t(lang, "showCountry"))} →</a>`;
   updateBar();
+  updateQuizFooter();
 }
 
 function setMode(m: Mode): void {
@@ -452,8 +490,10 @@ function applyStaticStrings(): void {
   searchInput.placeholder = t(lang, "searchPlaceholder");
   searchInput.setAttribute("aria-label", t(lang, "searchPlaceholder"));
   randomLabel.textContent = t(lang, "random");
-  themeSelect.setAttribute("aria-label", t(lang, "theme"));
+  document.getElementById("intro")!.textContent = t(lang, "intro");
   renderLangPicker();
+  renderThemePicker();
+  updateQuizFooter();
   document.getElementById("link-imprint")!.textContent = t(lang, "imprint");
   document.getElementById("link-privacy")!.textContent = t(lang, "privacy");
   resetBtn.title = t(lang, "reset");
@@ -464,13 +504,16 @@ function applyStaticStrings(): void {
 }
 
 resetBtn.addEventListener("click", () => {
-  if (mode === "quiz") {
-    score = resetScore();
-  } else {
-    deck.reset();
-    if (current) deck.markSeen(current.cca3);
-  }
+  deck.reset();
+  if (current) deck.markSeen(current.cca3);
   updateBar();
+});
+
+document.getElementById("q-next")!.addEventListener("click", () => renderQuestion(true));
+
+document.getElementById("q-reset")!.addEventListener("click", () => {
+  score = resetScore();
+  updateQuizFooter();
 });
 
 // --- navigation ----------------------------------------------------------
@@ -672,6 +715,77 @@ function flagSrc(code: string): string {
   return `${import.meta.env.BASE_URL}flags/${code}.svg`;
 }
 
+// Both dropdowns share this behaviour: open/close, close on outside click,
+// and full keyboard control. Items carry data-value — deliberately not
+// data-theme, which the selectors in themes.css would pick up.
+function setupPicker(
+  root: HTMLElement,
+  button: HTMLButtonElement,
+  menu: HTMLUListElement,
+  onSelect: (value: string) => void,
+): void {
+  const items = (): HTMLLIElement[] => [...menu.querySelectorAll<HTMLLIElement>("li[data-value]")];
+
+  const setOpen = (open: boolean): void => {
+    menu.hidden = !open;
+    button.setAttribute("aria-expanded", String(open));
+    if (open) {
+      const sel = items().findIndex((li) => li.getAttribute("aria-selected") === "true");
+      highlight(Math.max(0, sel));
+    }
+  };
+
+  const highlight = (idx: number): void => {
+    const list = items();
+    list.forEach((li, i) => li.classList.toggle("active", i === idx));
+    list[idx]?.scrollIntoView({ block: "nearest" });
+  };
+
+  const activeIdx = (): number => items().findIndex((li) => li.classList.contains("active"));
+
+  // No stopPropagation: the document handlers must still see the click so an
+  // open search dropdown closes.
+  button.addEventListener("click", () => setOpen(Boolean(menu.hidden)));
+
+  menu.addEventListener("click", (e) => {
+    const li = (e.target as HTMLElement).closest("li[data-value]");
+    if (!li) return;
+    setOpen(false);
+    onSelect(li.getAttribute("data-value")!);
+  });
+
+  menu.addEventListener("pointermove", (e) => {
+    const li = (e.target as HTMLElement).closest("li[data-value]");
+    if (li) highlight(items().indexOf(li as HTMLLIElement));
+  });
+
+  root.addEventListener("keydown", (e) => {
+    const open = !menu.hidden;
+    if (e.key === "Escape") {
+      setOpen(false);
+      button.focus();
+    } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!open) return setOpen(true);
+      const list = items();
+      const step = e.key === "ArrowDown" ? 1 : -1;
+      highlight((activeIdx() + step + list.length) % list.length);
+    } else if (open && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      const li = items()[activeIdx()];
+      if (li) {
+        setOpen(false);
+        button.focus();
+        onSelect(li.getAttribute("data-value")!);
+      }
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!(e.target as HTMLElement).closest(`#${root.id}`)) setOpen(false);
+  });
+}
+
 function renderLangPicker(): void {
   const meta = LANG_META[lang];
   (document.getElementById("lang-flag") as HTMLImageElement).src = flagSrc(meta.flag);
@@ -679,56 +793,51 @@ function renderLangPicker(): void {
   langButton.setAttribute("aria-label", `${t(lang, "language")}: ${meta.label}`);
   langMenu.innerHTML = LANGS.map(
     (l) =>
-      `<li role="option" data-lang="${l}" aria-selected="${l === lang}">
+      `<li role="option" data-value="${l}" aria-selected="${l === lang}">
          <img src="${flagSrc(LANG_META[l].flag)}" alt="" />
          <span>${esc(LANG_META[l].label)}</span>
        </li>`,
   ).join("");
 }
 
-function setLangMenu(open: boolean): void {
-  langMenu.hidden = !open;
-  langButton.setAttribute("aria-expanded", String(open));
+function renderThemePicker(): void {
+  const activeTheme = document.documentElement.dataset.theme ?? "atlas";
+  const meta = THEME_META.find((m) => m.id === activeTheme) ?? THEME_META[0];
+  const swatch = (m: (typeof THEME_META)[number]): string =>
+    `<span class="swatch" aria-hidden="true" style="--s-bg:${m.bg};--s-ink:${m.ink};--s-accent:${m.accent}"></span>`;
+  document.getElementById("theme-swatch")!.outerHTML = swatch(meta).replace(
+    'class="swatch"',
+    'class="swatch" id="theme-swatch"',
+  );
+  document.getElementById("theme-name")!.textContent = meta.label;
+  themeButton.setAttribute("aria-label", `${t(lang, "theme")}: ${meta.label}`);
+  themeMenu.innerHTML = THEME_META.map(
+    (m) =>
+      `<li role="option" data-value="${m.id}" aria-selected="${m.id === activeTheme}">
+         ${swatch(m)}<span>${esc(m.label)}</span>
+       </li>`,
+  ).join("");
 }
 
-// No stopPropagation here: the document-level handlers must still see this
-// click so an open search dropdown closes.
-langButton.addEventListener("click", () => {
-  setLangMenu(Boolean(langMenu.hidden));
-});
-
-langMenu.addEventListener("click", (e) => {
-  const li = (e.target as HTMLElement).closest("li[data-lang]");
-  if (!li) return;
-  lang = li.getAttribute("data-lang") as Lang;
+setupPicker(langPicker, langButton, langMenu, (value) => {
+  lang = value as Lang;
   localStorage.setItem(LANG_KEY, lang);
-  setLangMenu(false);
   applyStaticStrings();
   if (mode === "quiz") renderQuestion(true);
   else if (mode === "list") renderList();
   else if (current) render(current);
 });
 
-document.addEventListener("click", (e) => {
-  if (!(e.target as HTMLElement).closest("#lang-picker")) setLangMenu(false);
-});
-
-langPicker.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    setLangMenu(false);
-    langButton.focus();
-  }
+setupPicker(themePicker, themeButton, themeMenu, (value) => {
+  document.documentElement.dataset.theme = value;
+  localStorage.setItem(THEME_KEY, value);
+  renderThemePicker();
 });
 
 const storedTheme = localStorage.getItem(THEME_KEY);
 if (storedTheme && THEMES.includes(storedTheme)) {
   document.documentElement.dataset.theme = storedTheme;
 }
-themeSelect.value = document.documentElement.dataset.theme ?? "atlas";
-themeSelect.addEventListener("change", () => {
-  document.documentElement.dataset.theme = themeSelect.value;
-  localStorage.setItem(THEME_KEY, themeSelect.value);
-});
 
 // --- boot ----------------------------------------------------------------
 

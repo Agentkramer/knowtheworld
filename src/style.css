@@ -23,15 +23,37 @@ a {
 
 /* ---------- header ---------- */
 
+/* Two columns: identity and explanation on the left, everything you can
+   operate on the right, sharing one right edge. */
 .site-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1.5rem;
   flex-wrap: wrap;
   max-width: 1160px;
   margin: 0 auto;
   padding: 1.4rem clamp(1rem, 4vw, 2.5rem) 0.6rem;
+}
+
+.masthead {
+  max-width: 32rem;
+}
+
+.intro {
+  margin: 0.85rem 0 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 30rem;
+  text-wrap: pretty;
+}
+
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.6rem;
 }
 
 .brand {
@@ -60,25 +82,9 @@ a {
 .controls {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 0.55rem;
   flex-wrap: wrap;
-}
-
-.controls select {
-  appearance: none;
-  font: inherit;
-  font-size: 0.85rem;
-  font-weight: 550;
-  color: var(--ink);
-  background: var(--surface);
-  border: var(--border-width) solid var(--line);
-  border-radius: var(--radius-s);
-  padding: 0.45rem 0.7rem;
-  cursor: pointer;
-}
-
-.controls select:hover {
-  border-color: var(--accent);
 }
 
 /* ---------- language picker ----------
@@ -86,11 +92,11 @@ a {
    carry images and emoji flags are missing glyphs on Windows. This reuses
    the flag SVGs the site already ships. */
 
-.lang-picker {
+.picker {
   position: relative;
 }
 
-.lang-button {
+.picker-button {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
@@ -105,11 +111,11 @@ a {
   cursor: pointer;
 }
 
-.lang-button:hover {
+.picker-button:hover {
   border-color: var(--accent);
 }
 
-.lang-button img {
+.picker-button img {
   width: 1.35rem;
   height: 1.01rem;
   object-fit: cover;
@@ -117,7 +123,7 @@ a {
   box-shadow: 0 0 0 1px var(--line);
 }
 
-#lang-menu {
+.picker-menu {
   position: absolute;
   z-index: 30;
   top: calc(100% + 6px);
@@ -132,7 +138,7 @@ a {
   box-shadow: var(--shadow);
 }
 
-#lang-menu li {
+.picker-menu li {
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -142,7 +148,7 @@ a {
   font-size: 0.9rem;
 }
 
-#lang-menu li img {
+.picker-menu li img {
   width: 1.5rem;
   height: 1.125rem;
   object-fit: cover;
@@ -150,9 +156,32 @@ a {
   box-shadow: 0 0 0 1px var(--line);
 }
 
-#lang-menu li:hover,
-#lang-menu li[aria-selected="true"] {
+.picker-menu li.active {
   background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.picker-menu li[aria-selected="true"] {
+  font-weight: 650;
+}
+
+/* three-band chip previewing a theme's background, text and accent */
+.swatch {
+  flex: none;
+  width: 1.35rem;
+  height: 1.01rem;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px var(--line);
+  background: linear-gradient(
+    to right,
+    var(--s-bg) 0 40%,
+    var(--s-ink) 40% 70%,
+    var(--s-accent) 70% 100%
+  );
+}
+
+.picker-menu li .swatch {
+  width: 1.5rem;
+  height: 1.125rem;
 }
 
 /* ---------- search ---------- */
@@ -653,6 +682,20 @@ main {
   font-size: 0.92rem;
 }
 
+/* The quiz owns its own Next button and score, so no control changes meaning
+   depending on which view you are in. */
+.quiz-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.2rem;
+}
+
+.quiz-score {
+  justify-content: center;
+}
+
 /* ---------- list view ---------- */
 
 .sr-only {
@@ -796,20 +839,17 @@ main {
    content. On phones it becomes the floating bottom bar, where a fixed
    action within thumb reach is genuinely the better pattern. */
 
+/* Stacked top to bottom, sharing the right edge with the controls above:
+   view switch, primary action, counter. */
 .toolbar {
-  max-width: 1160px;
-  margin: 0 auto;
-  padding: 0.5rem clamp(1rem, 4vw, 2.5rem) 0;
   display: flex;
-  align-items: center;
-  gap: 0.9rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
 }
 
-.bar-buttons {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
+.random-btn[hidden] {
+  display: none;
 }
 
 .mode-switch {
@@ -872,7 +912,7 @@ main {
 }
 
 .progress {
-  margin: 0 0 0 auto;
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 0.35rem;
@@ -975,9 +1015,27 @@ main {
   }
 
   /* Phones: the toolbar returns to a floating bottom bar within thumb
-     reach, so the page needs room for it. */
+     reach, so the page needs room for it. The header keeps only the
+     identity, intro text and the controls. */
   body {
     padding-bottom: 9.5rem;
+  }
+
+  .site-header {
+    gap: 0.9rem;
+  }
+
+  .masthead,
+  .header-right {
+    flex: 1 1 100%;
+  }
+
+  .header-right {
+    align-items: stretch;
+  }
+
+  .controls {
+    justify-content: flex-start;
   }
 
   .toolbar {
@@ -985,29 +1043,34 @@ main {
     left: 50%;
     bottom: 1.4rem;
     transform: translateX(-50%);
+    width: max-content;
+    max-width: calc(100vw - 1.5rem);
     z-index: 40;
-    max-width: none;
-    padding: 0;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
     gap: 0.45rem;
     pointer-events: none;
   }
 
-  .bar-buttons {
-    flex-wrap: wrap;
-    justify-content: center;
+  .toolbar > * {
     pointer-events: auto;
   }
 
   .progress {
-    margin: 0;
-    pointer-events: auto;
+    flex: 1 0 100%;
+    justify-content: center;
     background: color-mix(in srgb, var(--bg) 82%, transparent);
     backdrop-filter: blur(6px);
   }
 
   .random-btn {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18), 0 12px 34px rgba(0, 0, 0, 0.16);
+  }
+
+  .quiz-footer .random-btn {
+    box-shadow: none;
   }
 
   .random-btn {
