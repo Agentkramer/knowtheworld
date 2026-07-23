@@ -2,7 +2,8 @@
 
 One country at a time. A static site for learning every country, its flag and
 its capital — a random country on every visit, a "surprise me" button, search,
-a quiz mode, four design themes and five languages (EN/DE/FR/IT/ES).
+a quiz mode, a sortable list of every country, four design themes and five
+languages (EN/DE/FR/IT/ES).
 
 ## Stack
 
@@ -43,8 +44,15 @@ the dataset; they come from the browser's `Intl.DisplayNames` at runtime.
   country → capital, map → country), distractors drawn from the same
   subregion/region so questions are genuinely hard; score and streak persist.
   Keyboard: `1–4` to answer, `Space` for the next question.
+- **List** (`src/list.ts`): all 194 countries sorted by name, capital,
+  population, area or density. Text sorts through `Intl.Collator` in the
+  active language (so "Ägypten" lands under A in German, "Égypte" under E in
+  French); missing values always sort last, ties fall back to country name.
+  On phones the table becomes cards and the column heads are replaced by a
+  chip row sharing the same `data-sort` hooks.
 - **Deploy**: `.github/workflows/deploy.yml` builds and publishes to GitHub
   Pages on every push to `main` (`DEPLOY_BASE` sets the Vite base path).
+  Switching to the custom domain means setting `DEPLOY_BASE` to `/`.
 - **Randomization**: shuffled deck (`src/deck.ts`) — every country appears once
   before any repeats; deck and seen-progress persist in `localStorage`.
 - **Map**: clickable — clicking a country jumps to it (hover shows its name);

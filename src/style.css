@@ -580,6 +580,144 @@ main {
   font-size: 0.92rem;
 }
 
+/* ---------- list view ---------- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.list-filter,
+.list-sort {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.4rem;
+}
+
+/* The chip row duplicates the table headers; only phones need it. */
+.list-sort {
+  display: none;
+}
+
+.list-filter button,
+.list-sort button {
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface);
+  border: var(--border-width) solid var(--line);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.list-filter button:hover,
+.list-sort button:hover {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+.list-filter button.active,
+.list-sort button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--surface);
+}
+
+.country-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.country-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg);
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 640;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.6rem 0.7rem;
+  border-bottom: var(--stat-rule, 1px solid var(--line));
+  white-space: nowrap;
+}
+
+.country-table th[data-sort] {
+  cursor: pointer;
+  user-select: none;
+}
+
+.country-table th[data-sort]:hover {
+  color: var(--ink);
+}
+
+.country-table th.sorted {
+  color: var(--accent);
+}
+
+.country-table th .arrow {
+  display: inline-block;
+  width: 0.9em;
+  font-size: 0.75em;
+}
+
+.country-table td {
+  padding: 0.5rem 0.7rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.country-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.country-table tbody tr:hover {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.country-table .num {
+  text-align: right;
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.country-table .col-rank {
+  width: 2.5rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.country-table .col-flag {
+  width: 2.6rem;
+}
+
+.country-table .col-flag img {
+  display: block;
+  width: 2rem;
+  height: 1.5rem;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+.country-table .col-name {
+  font-weight: 600;
+}
+
 /* ---------- random bar ---------- */
 
 .random-bar {
@@ -601,24 +739,37 @@ main {
   gap: 0.6rem;
 }
 
-.mode-btn {
+.mode-switch {
   pointer-events: auto;
-  font: inherit;
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: var(--ink);
+  display: flex;
+  gap: 2px;
   background: var(--surface);
   border: var(--border-width) solid var(--line);
   border-radius: 999px;
-  padding: 0.75rem 1.3rem;
-  cursor: pointer;
+  padding: 3px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.1);
-  transition: transform 0.15s ease, border-color 0.15s ease;
 }
 
-.mode-btn:hover {
-  border-color: var(--accent);
-  transform: translateY(-2px);
+.mode-switch button {
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1.05rem;
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.2s ease;
+}
+
+.mode-switch button:hover {
+  color: var(--ink);
+}
+
+.mode-switch button.active {
+  background: var(--accent);
+  color: var(--surface);
 }
 
 .random-btn {
@@ -702,7 +853,8 @@ main {
 /* ---------- entrance animation ---------- */
 
 .country.enter > *,
-.quiz.enter > * {
+.quiz.enter > *,
+.list-view.enter > * {
   animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -752,6 +904,28 @@ main {
   .panels {
     grid-template-columns: 1fr;
   }
+
+  /* Three view buttons plus the primary action no longer fit on one line;
+     let them wrap and keep clear of the last list rows. */
+  body {
+    padding-bottom: 9.5rem;
+  }
+
+  .bar-buttons {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .random-btn {
+    white-space: nowrap;
+    font-size: 0.95rem;
+    padding: 0.7rem 1.35rem;
+  }
+
+  .mode-switch button {
+    font-size: 0.82rem;
+    padding: 0.55rem 0.85rem;
+  }
   .site-header {
     padding-top: 1rem;
   }
@@ -763,5 +937,68 @@ main {
   }
   .quiz-options {
     grid-template-columns: 1fr;
+  }
+
+  /* Table → cards: a 7-column table cannot work on a phone, but sorting
+     must survive, so the chip row takes over from the header. */
+  .list-sort {
+    display: flex;
+  }
+
+  .country-table,
+  .country-table tbody {
+    display: block;
+  }
+
+  .country-table thead {
+    display: none;
+  }
+
+  .country-table tbody tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.2rem 0.7rem;
+    padding: 0.75rem 0.15rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .country-table td {
+    border: none;
+    padding: 0;
+  }
+
+  .country-table .num {
+    text-align: left;
+  }
+
+  .country-table .col-rank {
+    width: 1.8rem;
+  }
+
+  .country-table .col-name {
+    flex: 1 1 auto;
+    font-size: 1.05rem;
+  }
+
+  .country-table td[data-label] {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .country-table td[data-label]::before {
+    content: attr(data-label) " ";
+    opacity: 0.75;
+  }
+
+  /* capital gets its own line, the three figures wrap below it */
+  .country-table td[data-label]:nth-of-type(4) {
+    flex: 1 0 100%;
+    font-size: 0.9rem;
+    color: var(--ink);
+  }
+
+  .country-table td[data-label]:nth-of-type(4)::before {
+    content: "";
   }
 }

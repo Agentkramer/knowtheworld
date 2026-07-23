@@ -13,6 +13,7 @@ import { LANGS, countryName, currencyNames, formatNumber, formatYear, languageNa
 import { Deck } from "./deck";
 import { MapView, type ZoomLevel } from "./map";
 import { loadScore, makeQuestion, recordAnswer, resetScore, type Question } from "./quiz";
+import { density, loadSort, saveSort, sortCountries, type SortDir, type SortKey } from "./list";
 
 const countries = countriesJson as unknown as Country[];
 const worldMap = worldMapJson as unknown as WorldMap;
@@ -48,7 +49,8 @@ function initialZoom(): ZoomLevel {
 let lang: Lang = initialLang();
 let zoomLevel: ZoomLevel = initialZoom();
 let current: Country | null = null;
-let mode: "explore" | "quiz" = "explore";
+type Mode = "explore" | "list" | "quiz";
+let mode: Mode = "explore";
 let question: Question | null = null;
 let answered = false;
 let score = loadScore();
@@ -63,7 +65,7 @@ const langSelect = document.getElementById("lang-select") as HTMLSelectElement;
 const themeSelect = document.getElementById("theme-select") as HTMLSelectElement;
 const randomBtn = document.getElementById("random-btn") as HTMLButtonElement;
 const randomLabel = document.getElementById("random-label")!;
-const modeBtn = document.getElementById("mode-btn") as HTMLButtonElement;
+const modeSwitch = document.getElementById("mode-switch")!;
 const progressEl = document.getElementById("progress")!;
 const resetBtn = document.getElementById("reset-btn") as HTMLButtonElement;
 
@@ -88,10 +90,19 @@ app.innerHTML = `
     <div class="quiz-options" id="q-options"></div>
     <p class="quiz-feedback" id="q-feedback"></p>
   </section>
+  <section class="list-view" id="list-view" hidden>
+    <div class="list-filter" id="list-filter"></div>
+    <div class="list-sort" id="list-sort"></div>
+    <table class="country-table" id="country-table">
+      <thead id="list-head"></thead>
+      <tbody id="list-body"></tbody>
+    </table>
+  </section>
 `;
 
 const view = document.getElementById("country-view")!;
 const quizView = document.getElementById("quiz-view")!;
+const listView = document.getElementById("list-view")!;
 const mapView = new MapView(document.getElementById("map-container")!, worldMap, {
   interactive: true,
   onSelect: (code) => show(code),
@@ -218,16 +229,108 @@ function render(c: Country): void {
 }
 
 function updateBar(): void {
-  if (mode === "explore") {
-    randomLabel.textContent = t(lang, "random");
-    modeBtn.textContent = t(lang, "quiz");
-    progressEl.textContent = t(lang, "seen", { n: deck.seenCount, total: deck.total });
-  } else {
-    randomLabel.textContent = t(lang, "next");
-    modeBtn.textContent = t(lang, "explore");
+  randomLabel.textContent = mode === "quiz" ? t(lang, "next") : t(lang, "random");
+  if (mode === "quiz") {
     const streak = score.streak > 1 ? ` · 🔥 ${score.streak}` : "";
     progressEl.textContent = `✓ ${score.correct} / ${score.total}${streak}`;
+  } else {
+    progressEl.textContent = t(lang, "seen", { n: deck.seenCount, total: deck.total });
   }
+  renderModeSwitch();
+}
+
+function renderModeSwitch(): void {
+  const modes: [Mode, string][] = [
+    ["explore", t(lang, "explore")],
+    ["list", t(lang, "list")],
+    ["quiz", t(lang, "quiz")],
+  ];
+  modeSwitch.innerHTML = modes
+    .map(
+      ([m, label]) =>
+        `<button type="button" data-mode="${m}" class="${m === mode ? "active" : ""}">${esc(label)}</button>`,
+    )
+    .join("");
+}
+
+modeSwitch.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest("[data-mode]");
+  if (btn) setMode(btn.getAttribute("data-mode") as Mode);
+});
+
+// --- list view -----------------------------------------------------------
+
+const savedSort = loadSort();
+let sortKey: SortKey = savedSort.key;
+let sortDir: SortDir = savedSort.dir;
+let regionFilter: string | null = null;
+
+function renderList(): void {
+  document.title = `${t(lang, "list")} — Know the World`;
+
+  const regions = [...byRegion.keys()].sort((a, b) =>
+    regionName(lang, a).localeCompare(regionName(lang, b), lang),
+  );
+  document.getElementById("list-filter")!.innerHTML = [
+    `<button type="button" data-region="" class="${regionFilter === null ? "active" : ""}">${esc(t(lang, "allRegions"))}</button>`,
+    ...regions.map(
+      (r) =>
+        `<button type="button" data-region="${esc(r)}" class="${regionFilter === r ? "active" : ""}">${esc(regionName(lang, r))}</button>`,
+    ),
+  ].join("");
+
+  // Units live in the column head, not in all 194 cells — shorter rows and
+  // no wrapped "km²" fragments in the mono-spaced themes.
+  const cols: { key: SortKey; label: string; numeric: boolean }[] = [
+    { key: "name", label: t(lang, "country"), numeric: false },
+    { key: "capital", label: t(lang, "capital"), numeric: false },
+    { key: "population", label: t(lang, "population"), numeric: true },
+    { key: "area", label: `${t(lang, "area")} (km²)`, numeric: true },
+    { key: "density", label: `${t(lang, "density")} (/km²)`, numeric: true },
+  ];
+
+  // Same data-sort hooks as the table headers, so phones (where the header
+  // row is replaced by cards) keep full sorting control.
+  document.getElementById("list-sort")!.innerHTML = cols
+    .map(
+      (c) =>
+        `<button type="button" data-sort="${c.key}" class="${c.key === sortKey ? "active" : ""}">${esc(c.label)}${
+          c.key === sortKey ? ` ${sortDir === "asc" ? "▲" : "▼"}` : ""
+        }</button>`,
+    )
+    .join("");
+
+  document.getElementById("list-head")!.innerHTML =
+    // The flag column is decorative — the country name sits right next to it.
+    `<tr><th class="col-rank">#</th><th class="col-flag"></th>` +
+    cols
+      .map(
+        (c) =>
+          `<th data-sort="${c.key}" class="${c.numeric ? "num" : ""} ${c.key === sortKey ? "sorted" : ""}"
+             aria-sort="${c.key === sortKey ? (sortDir === "asc" ? "ascending" : "descending") : "none"}">
+             <span>${esc(c.label)}</span><span class="arrow">${c.key === sortKey ? (sortDir === "asc" ? "▲" : "▼") : ""}</span>
+           </th>`,
+      )
+      .join("") +
+    "</tr>";
+
+  const pool = regionFilter ? countries.filter((c) => c.region === regionFilter) : countries;
+  const rows = sortCountries(pool, sortKey, sortDir, lang);
+
+  document.getElementById("list-body")!.innerHTML = rows
+    .map((c, i) => {
+      const d = density(c);
+      return `<tr data-code="${c.cca3}">
+        <td class="col-rank">${i + 1}</td>
+        <td class="col-flag"><img src="${import.meta.env.BASE_URL}flags/${c.cca2.toLowerCase()}.svg" alt="" loading="lazy" /></td>
+        <td class="col-name">${esc(countryName(c, lang))}</td>
+        <td data-label="${esc(t(lang, "capital"))}">${esc(c.capital[lang] ?? c.capital.en ?? "—")}</td>
+        <td class="num" data-label="${esc(t(lang, "population"))}">${c.population ? formatNumber(lang, c.population) : "—"}</td>
+        <td class="num" data-label="${esc(t(lang, "area"))} km²">${formatNumber(lang, c.area)}</td>
+        <td class="num" data-label="${esc(t(lang, "density"))} /km²">${d ? formatNumber(lang, Math.round(d)) : "—"}</td>
+      </tr>`;
+    })
+    .join("");
 }
 
 // --- quiz ----------------------------------------------------------------
@@ -310,20 +413,25 @@ function answerQuestion(idx: number): void {
   updateBar();
 }
 
-function setMode(m: "explore" | "quiz"): void {
+function setMode(m: Mode): void {
   mode = m;
-  view.hidden = m === "quiz";
-  quizView.hidden = m === "explore";
+  view.hidden = m !== "explore";
+  quizView.hidden = m !== "quiz";
+  listView.hidden = m !== "list";
   if (m === "quiz") {
     history.replaceState(null, "", "#quiz");
     renderQuestion(false);
+  } else if (m === "list") {
+    history.replaceState(null, "", "#liste");
+    renderList();
+    listView.classList.remove("enter");
+    void (listView as HTMLElement).offsetWidth;
+    listView.classList.add("enter");
+  } else if (current) {
+    history.replaceState(null, "", `#${current.cca3.toLowerCase()}`);
+    render(current);
   } else {
-    if (current) {
-      history.replaceState(null, "", `#${current.cca3.toLowerCase()}`);
-      render(current);
-    } else {
-      showRandom();
-    }
+    showRandom();
   }
   updateBar();
 }
@@ -337,6 +445,7 @@ function applyStaticStrings(): void {
   resetBtn.title = t(lang, "reset");
   resetBtn.setAttribute("aria-label", t(lang, "reset"));
   renderZoomCtrl();
+  renderModeSwitch();
   document.documentElement.lang = lang;
 }
 
@@ -355,10 +464,11 @@ resetBtn.addEventListener("click", () => {
 function show(code: string, updateHash = true): void {
   const c = byCca3.get(code.toUpperCase());
   if (!c) return;
-  if (mode === "quiz") {
+  if (mode !== "explore") {
     mode = "explore";
     view.hidden = false;
     quizView.hidden = true;
+    listView.hidden = true;
   } else if (c === current) {
     return;
   }
@@ -378,6 +488,8 @@ window.addEventListener("hashchange", () => {
   const code = location.hash.slice(1).toUpperCase();
   if (code === "QUIZ") {
     if (mode !== "quiz") setMode("quiz");
+  } else if (code === "LISTE") {
+    if (mode !== "list") setMode("list");
   } else if (byCca3.has(code)) {
     show(code, false);
   }
@@ -388,12 +500,13 @@ randomBtn.addEventListener("click", () => {
   else showRandom();
 });
 
-modeBtn.addEventListener("click", () => setMode(mode === "quiz" ? "explore" : "quiz"));
-
 window.addEventListener("keydown", (e) => {
   const target = e.target as HTMLElement;
   if (target.tagName === "INPUT" || target.tagName === "SELECT" || target.tagName === "TEXTAREA") return;
   if (e.code === "Space" || e.key.toLowerCase() === "r") {
+    // In the list, Space must keep scrolling the page — hijacking it there
+    // would break the one thing a long list needs most.
+    if (e.code === "Space" && mode === "list") return;
     e.preventDefault();
     if (mode === "quiz") renderQuestion(true);
     else showRandom();
@@ -503,13 +616,40 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// neighbor chips + quiz options (delegated — these re-render constantly)
+// neighbor chips, quiz options, list rows/headers (delegated — all of these
+// re-render constantly)
 app.addEventListener("click", (e) => {
   const el = e.target as HTMLElement;
+
   const chip = el.closest(".chip[data-code]");
   if (chip) show(chip.getAttribute("data-code")!);
+
   const option = el.closest<HTMLButtonElement>(".quiz-option[data-idx]");
   if (option && !option.disabled) answerQuestion(Number(option.dataset.idx));
+
+  const row = el.closest("tr[data-code]");
+  if (row) show(row.getAttribute("data-code")!);
+
+  const th = el.closest("[data-sort]");
+  if (th) {
+    const key = th.getAttribute("data-sort") as SortKey;
+    if (key === sortKey) {
+      sortDir = sortDir === "asc" ? "desc" : "asc";
+    } else {
+      sortKey = key;
+      // Names read best A–Z, figures best largest-first.
+      sortDir = key === "name" || key === "capital" ? "asc" : "desc";
+    }
+    saveSort(sortKey, sortDir);
+    renderList();
+  }
+
+  const regionBtn = el.closest("[data-region]");
+  if (regionBtn) {
+    const r = regionBtn.getAttribute("data-region")!;
+    regionFilter = r === "" ? null : r;
+    renderList();
+  }
 });
 
 // --- language & theme ----------------------------------------------------
@@ -520,6 +660,7 @@ langSelect.addEventListener("change", () => {
   localStorage.setItem(LANG_KEY, lang);
   applyStaticStrings();
   if (mode === "quiz") renderQuestion(true);
+  else if (mode === "list") renderList();
   else if (current) render(current);
 });
 
@@ -539,6 +680,8 @@ applyStaticStrings();
 const initial = location.hash.slice(1).toUpperCase();
 if (initial === "QUIZ") {
   setMode("quiz");
+} else if (initial === "LISTE") {
+  setMode("list");
 } else if (byCca3.has(initial)) {
   show(initial, false);
 } else {

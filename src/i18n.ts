@@ -35,6 +35,9 @@ interface UiStrings {
   zoomWorld: string;
   zoomContinent: string;
   zoomRegion: string;
+  list: string;
+  country: string;
+  allRegions: string;
 }
 
 export const STRINGS: Record<Lang, UiStrings> = {
@@ -71,6 +74,9 @@ export const STRINGS: Record<Lang, UiStrings> = {
     zoomWorld: "World",
     zoomContinent: "Continent",
     zoomRegion: "Region",
+    list: "List",
+    country: "Country",
+    allRegions: "All",
   },
   de: {
     searchPlaceholder: "Land suchen…",
@@ -105,6 +111,9 @@ export const STRINGS: Record<Lang, UiStrings> = {
     zoomWorld: "Welt",
     zoomContinent: "Kontinent",
     zoomRegion: "Region",
+    list: "Liste",
+    country: "Land",
+    allRegions: "Alle",
   },
   fr: {
     searchPlaceholder: "Rechercher un pays…",
@@ -139,6 +148,9 @@ export const STRINGS: Record<Lang, UiStrings> = {
     zoomWorld: "Monde",
     zoomContinent: "Continent",
     zoomRegion: "Région",
+    list: "Liste",
+    country: "Pays",
+    allRegions: "Tous",
   },
   it: {
     searchPlaceholder: "Cerca un paese…",
@@ -173,6 +185,9 @@ export const STRINGS: Record<Lang, UiStrings> = {
     zoomWorld: "Mondo",
     zoomContinent: "Continente",
     zoomRegion: "Regione",
+    list: "Elenco",
+    country: "Paese",
+    allRegions: "Tutti",
   },
   es: {
     searchPlaceholder: "Buscar un país…",
@@ -207,6 +222,9 @@ export const STRINGS: Record<Lang, UiStrings> = {
     zoomWorld: "Mundo",
     zoomContinent: "Continente",
     zoomRegion: "Región",
+    list: "Lista",
+    country: "País",
+    allRegions: "Todos",
   },
 };
 
