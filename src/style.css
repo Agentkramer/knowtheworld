@@ -15,7 +15,6 @@ body {
   background: var(--bg);
   color: var(--ink);
   transition: background-color 0.35s ease, color 0.35s ease;
-  padding-bottom: 6.5rem; /* room for the floating random bar */
 }
 
 a {
@@ -80,6 +79,80 @@ a {
 
 .controls select:hover {
   border-color: var(--accent);
+}
+
+/* ---------- language picker ----------
+   A custom dropdown rather than a <select>, because option elements cannot
+   carry images and emoji flags are missing glyphs on Windows. This reuses
+   the flag SVGs the site already ships. */
+
+.lang-picker {
+  position: relative;
+}
+
+.lang-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 550;
+  color: var(--ink);
+  background: var(--surface);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--radius-s);
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+}
+
+.lang-button:hover {
+  border-color: var(--accent);
+}
+
+.lang-button img {
+  width: 1.35rem;
+  height: 1.01rem;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+#lang-menu {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 11rem;
+  margin: 0;
+  padding: 0.3rem;
+  list-style: none;
+  background: var(--surface);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--radius-s);
+  box-shadow: var(--shadow);
+}
+
+#lang-menu li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: calc(var(--radius-s) - 3px);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+#lang-menu li img {
+  width: 1.5rem;
+  height: 1.125rem;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+#lang-menu li:hover,
+#lang-menu li[aria-selected="true"] {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
 /* ---------- search ---------- */
@@ -718,19 +791,19 @@ main {
   font-weight: 600;
 }
 
-/* ---------- random bar ---------- */
+/* ---------- toolbar ----------
+   On desktop this is a normal row under the header, so it never covers
+   content. On phones it becomes the floating bottom bar, where a fixed
+   action within thumb reach is genuinely the better pattern. */
 
-.random-bar {
-  position: fixed;
-  left: 50%;
-  bottom: 1.4rem;
-  transform: translateX(-50%);
-  z-index: 40;
+.toolbar {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0.5rem clamp(1rem, 4vw, 2.5rem) 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.45rem;
-  pointer-events: none;
+  gap: 0.9rem;
+  flex-wrap: wrap;
 }
 
 .bar-buttons {
@@ -784,15 +857,14 @@ main {
   background: var(--btn-bg);
   border: var(--btn-border, none);
   border-radius: 999px;
-  padding: 0.85rem 1.7rem;
+  padding: 0.7rem 1.5rem;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18), 0 12px 34px rgba(0, 0, 0, 0.16);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .random-btn:hover {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2), 0 16px 40px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18), 0 14px 34px rgba(0, 0, 0, 0.14);
 }
 
 .random-btn:active {
@@ -800,7 +872,7 @@ main {
 }
 
 .progress {
-  margin: 0;
+  margin: 0 0 0 auto;
   display: flex;
   align-items: center;
   gap: 0.35rem;
@@ -808,11 +880,8 @@ main {
   font-weight: 550;
   letter-spacing: 0.06em;
   color: var(--muted);
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
   padding: 0.15rem 0.3rem 0.15rem 0.6rem;
   border-radius: 999px;
-  backdrop-filter: blur(6px);
-  pointer-events: auto;
 }
 
 .reset-btn {
@@ -905,15 +974,40 @@ main {
     grid-template-columns: 1fr;
   }
 
-  /* Three view buttons plus the primary action no longer fit on one line;
-     let them wrap and keep clear of the last list rows. */
+  /* Phones: the toolbar returns to a floating bottom bar within thumb
+     reach, so the page needs room for it. */
   body {
     padding-bottom: 9.5rem;
+  }
+
+  .toolbar {
+    position: fixed;
+    left: 50%;
+    bottom: 1.4rem;
+    transform: translateX(-50%);
+    z-index: 40;
+    max-width: none;
+    padding: 0;
+    flex-direction: column;
+    gap: 0.45rem;
+    pointer-events: none;
   }
 
   .bar-buttons {
     flex-wrap: wrap;
     justify-content: center;
+    pointer-events: auto;
+  }
+
+  .progress {
+    margin: 0;
+    pointer-events: auto;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(6px);
+  }
+
+  .random-btn {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18), 0 12px 34px rgba(0, 0, 0, 0.16);
   }
 
   .random-btn {

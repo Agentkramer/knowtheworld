@@ -38,6 +38,8 @@ interface UiStrings {
   list: string;
   country: string;
   allRegions: string;
+  imprint: string;
+  privacy: string;
 }
 
 export const STRINGS: Record<Lang, UiStrings> = {
@@ -77,6 +79,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
     list: "List",
     country: "Country",
     allRegions: "All",
+    imprint: "Imprint",
+    privacy: "Privacy",
   },
   de: {
     searchPlaceholder: "Land suchen…",
@@ -114,6 +118,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
     list: "Liste",
     country: "Land",
     allRegions: "Alle",
+    imprint: "Impressum",
+    privacy: "Datenschutz",
   },
   fr: {
     searchPlaceholder: "Rechercher un pays…",
@@ -151,6 +157,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
     list: "Liste",
     country: "Pays",
     allRegions: "Tous",
+    imprint: "Mentions légales",
+    privacy: "Confidentialité",
   },
   it: {
     searchPlaceholder: "Cerca un paese…",
@@ -188,6 +196,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
     list: "Elenco",
     country: "Paese",
     allRegions: "Tutti",
+    imprint: "Note legali",
+    privacy: "Privacy",
   },
   es: {
     searchPlaceholder: "Buscar un país…",
@@ -225,6 +235,8 @@ export const STRINGS: Record<Lang, UiStrings> = {
     list: "Lista",
     country: "País",
     allRegions: "Todos",
+    imprint: "Aviso legal",
+    privacy: "Privacidad",
   },
 };
 
@@ -270,6 +282,14 @@ const REGIONS: RegionMap = {
   "Central Asia": { de: "Zentralasien", fr: "Asie centrale", it: "Asia centrale", es: "Asia central" },
   Micronesia: { de: "Mikronesien", fr: "Micronésie", it: "Micronesia", es: "Micronesia" },
   Polynesia: { de: "Polynesien", fr: "Polynésie", it: "Polinesia", es: "Polinesia" },
+};
+
+export const LANG_META: Record<Lang, { label: string; flag: string }> = {
+  en: { label: "English", flag: "gb" },
+  de: { label: "Deutsch", flag: "de" },
+  fr: { label: "Français", flag: "fr" },
+  it: { label: "Italiano", flag: "it" },
+  es: { label: "Español", flag: "es" },
 };
 
 export function t(lang: Lang, key: keyof UiStrings, vars?: Record<string, string | number>): string {

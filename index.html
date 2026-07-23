@@ -2,7 +2,7 @@
 <html lang="en" data-theme="atlas">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="One country at a time — learn every country, flag and capital." />
     <title>Know the World</title>
@@ -25,13 +25,16 @@
           />
           <ul id="search-results" hidden></ul>
         </div>
-        <select id="lang-select" aria-label="Language">
-          <option value="en">EN</option>
-          <option value="de">DE</option>
-          <option value="fr">FR</option>
-          <option value="it">IT</option>
-          <option value="es">ES</option>
-        </select>
+        <div class="lang-picker" id="lang-picker">
+          <button type="button" id="lang-button" class="lang-button" aria-haspopup="listbox" aria-expanded="false">
+            <img id="lang-flag" alt="" />
+            <span id="lang-code">EN</span>
+            <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2.5 4.5 6 8l3.5-3.5" />
+            </svg>
+          </button>
+          <ul id="lang-menu" role="listbox" hidden></ul>
+        </div>
         <select id="theme-select" aria-label="Theme">
           <option value="atlas">Atlas</option>
           <option value="swiss">Swiss</option>
@@ -41,22 +44,20 @@
       </div>
     </header>
 
-    <main id="app"></main>
-
-    <div class="random-bar">
+    <nav class="toolbar" id="toolbar">
       <div class="bar-buttons">
-      <button id="random-btn" class="random-btn" type="button">
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
-          <rect x="3.5" y="3.5" width="17" height="17" rx="4"/>
-          <circle cx="8.6" cy="8.6" r="1.4" fill="currentColor" stroke="none"/>
-          <circle cx="15.4" cy="8.6" r="1.4" fill="currentColor" stroke="none"/>
-          <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/>
-          <circle cx="8.6" cy="15.4" r="1.4" fill="currentColor" stroke="none"/>
-          <circle cx="15.4" cy="15.4" r="1.4" fill="currentColor" stroke="none"/>
-        </svg>
-        <span id="random-label">Surprise me</span>
-      </button>
-      <div class="mode-switch" id="mode-switch"></div>
+        <button id="random-btn" class="random-btn" type="button">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+            <rect x="3.5" y="3.5" width="17" height="17" rx="4"/>
+            <circle cx="8.6" cy="8.6" r="1.4" fill="currentColor" stroke="none"/>
+            <circle cx="15.4" cy="8.6" r="1.4" fill="currentColor" stroke="none"/>
+            <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/>
+            <circle cx="8.6" cy="15.4" r="1.4" fill="currentColor" stroke="none"/>
+            <circle cx="15.4" cy="15.4" r="1.4" fill="currentColor" stroke="none"/>
+          </svg>
+          <span id="random-label">Surprise me</span>
+        </button>
+        <div class="mode-switch" id="mode-switch"></div>
       </div>
       <p class="progress">
         <span id="progress"></span>
@@ -67,9 +68,15 @@
           </svg>
         </button>
       </p>
-    </div>
+    </nav>
+
+    <main id="app"></main>
 
     <footer class="site-footer">
+      <p class="footer-legal">
+        <a href="./impressum.html" id="link-imprint">Impressum</a> ·
+        <a href="./datenschutz.html" id="link-privacy">Datenschutz</a>
+      </p>
       <p>
         Data: <a href="https://www.wikidata.org" rel="noopener">Wikidata</a> ·
         <a href="https://github.com/mledoze/countries" rel="noopener">world-countries</a> ·

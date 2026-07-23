@@ -9,7 +9,17 @@ import "./themes.css";
 import countriesJson from "./data/countries.json";
 import worldMapJson from "./data/world-map.json";
 import type { Country, Lang, WorldMap } from "./types";
-import { LANGS, countryName, currencyNames, formatNumber, formatYear, languageNames, regionName, t } from "./i18n";
+import {
+  LANGS,
+  LANG_META,
+  countryName,
+  currencyNames,
+  formatNumber,
+  formatYear,
+  languageNames,
+  regionName,
+  t,
+} from "./i18n";
 import { Deck } from "./deck";
 import { MapView, type ZoomLevel } from "./map";
 import { loadScore, makeQuestion, recordAnswer, resetScore, type Question } from "./quiz";
@@ -61,7 +71,9 @@ const deck = new Deck(countries.map((c) => c.cca3));
 const app = document.getElementById("app")!;
 const searchInput = document.getElementById("search-input") as HTMLInputElement;
 const searchResults = document.getElementById("search-results") as HTMLUListElement;
-const langSelect = document.getElementById("lang-select") as HTMLSelectElement;
+const langPicker = document.getElementById("lang-picker")!;
+const langButton = document.getElementById("lang-button") as HTMLButtonElement;
+const langMenu = document.getElementById("lang-menu") as HTMLUListElement;
 const themeSelect = document.getElementById("theme-select") as HTMLSelectElement;
 const randomBtn = document.getElementById("random-btn") as HTMLButtonElement;
 const randomLabel = document.getElementById("random-label")!;
@@ -440,8 +452,10 @@ function applyStaticStrings(): void {
   searchInput.placeholder = t(lang, "searchPlaceholder");
   searchInput.setAttribute("aria-label", t(lang, "searchPlaceholder"));
   randomLabel.textContent = t(lang, "random");
-  langSelect.setAttribute("aria-label", t(lang, "language"));
   themeSelect.setAttribute("aria-label", t(lang, "theme"));
+  renderLangPicker();
+  document.getElementById("link-imprint")!.textContent = t(lang, "imprint");
+  document.getElementById("link-privacy")!.textContent = t(lang, "privacy");
   resetBtn.title = t(lang, "reset");
   resetBtn.setAttribute("aria-label", t(lang, "reset"));
   renderZoomCtrl();
@@ -654,14 +668,56 @@ app.addEventListener("click", (e) => {
 
 // --- language & theme ----------------------------------------------------
 
-langSelect.value = lang;
-langSelect.addEventListener("change", () => {
-  lang = langSelect.value as Lang;
+function flagSrc(code: string): string {
+  return `${import.meta.env.BASE_URL}flags/${code}.svg`;
+}
+
+function renderLangPicker(): void {
+  const meta = LANG_META[lang];
+  (document.getElementById("lang-flag") as HTMLImageElement).src = flagSrc(meta.flag);
+  document.getElementById("lang-code")!.textContent = lang.toUpperCase();
+  langButton.setAttribute("aria-label", `${t(lang, "language")}: ${meta.label}`);
+  langMenu.innerHTML = LANGS.map(
+    (l) =>
+      `<li role="option" data-lang="${l}" aria-selected="${l === lang}">
+         <img src="${flagSrc(LANG_META[l].flag)}" alt="" />
+         <span>${esc(LANG_META[l].label)}</span>
+       </li>`,
+  ).join("");
+}
+
+function setLangMenu(open: boolean): void {
+  langMenu.hidden = !open;
+  langButton.setAttribute("aria-expanded", String(open));
+}
+
+// No stopPropagation here: the document-level handlers must still see this
+// click so an open search dropdown closes.
+langButton.addEventListener("click", () => {
+  setLangMenu(Boolean(langMenu.hidden));
+});
+
+langMenu.addEventListener("click", (e) => {
+  const li = (e.target as HTMLElement).closest("li[data-lang]");
+  if (!li) return;
+  lang = li.getAttribute("data-lang") as Lang;
   localStorage.setItem(LANG_KEY, lang);
+  setLangMenu(false);
   applyStaticStrings();
   if (mode === "quiz") renderQuestion(true);
   else if (mode === "list") renderList();
   else if (current) render(current);
+});
+
+document.addEventListener("click", (e) => {
+  if (!(e.target as HTMLElement).closest("#lang-picker")) setLangMenu(false);
+});
+
+langPicker.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    setLangMenu(false);
+    langButton.focus();
+  }
 });
 
 const storedTheme = localStorage.getItem(THEME_KEY);

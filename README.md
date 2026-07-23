@@ -51,8 +51,14 @@ the dataset; they come from the browser's `Intl.DisplayNames` at runtime.
   On phones the table becomes cards and the column heads are replaced by a
   chip row sharing the same `data-sort` hooks.
 - **Deploy**: `.github/workflows/deploy.yml` builds and publishes to GitHub
-  Pages on every push to `main` (`DEPLOY_BASE` sets the Vite base path).
-  Switching to the custom domain means setting `DEPLOY_BASE` to `/`.
+  Pages on every push to `main`. The Vite `base` is `"./"`, so one artifact
+  works both at `/knowtheworld/` and at the domain root — adding the custom
+  domain needs no rebuild and causes no downtime. This relies on routing
+  being hash-based; adding real path routes would require revisiting it.
+- **Legal pages**: `impressum.html` and `datenschutz.html` are separate
+  static pages (Vite multi-page), German and English on one page each, so
+  they stay reachable without JavaScript. They contain placeholders that
+  must be filled before going public.
 - **Randomization**: shuffled deck (`src/deck.ts`) — every country appears once
   before any repeats; deck and seen-progress persist in `localStorage`.
 - **Map**: clickable — clicking a country jumps to it (hover shows its name);
