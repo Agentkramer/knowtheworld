@@ -14,6 +14,7 @@ export default defineConfig({
         ueber: resolve(__dirname, "ueber.html"),
         impressum: resolve(__dirname, "impressum.html"),
         datenschutz: resolve(__dirname, "datenschutz.html"),
+        "404": resolve(__dirname, "404.html"),
       },
     },
   },
