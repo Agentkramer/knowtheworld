@@ -59,6 +59,13 @@ the dataset; they come from the browser's `Intl.DisplayNames` at runtime.
   `impressum.html` and `datenschutz.html` (German + English on one page);
   `ueber.html` (About) carries all five languages and shows the one matching
   the stored `ktw-lang`, with chips to switch. All adopt the stored theme.
+- **Territories**: 8 non-sovereign/disputed territories (Greenland, Western
+  Sahara, Taiwan, Palestine, Kosovo, Falklands, Puerto Rico, New Caledonia)
+  are full pages with a neutral status note (`scripts/territories.mjs`),
+  browsable via map, search, list and the random deck, and clearly badged —
+  but kept out of the **quiz** (which stays on the 194 sovereign states, so
+  it never implies statehood). The map draws Somaliland, N. Cyprus and the
+  French Southern Lands as neutral land (no page); Antarctica is omitted.
 - **Wikipedia links**: per-country, per-language article URLs from Wikidata
   sitelinks, baked into `countries.json`; the country page links to the
   article in the active language (English fallback).

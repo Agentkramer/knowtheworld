@@ -46,6 +46,7 @@ interface UiStrings {
   wikipedia: string;
   about: string;
   dataAsOf: string; // "{date}" placeholder
+  territory: string;
 }
 
 export const STRINGS: Record<Lang, UiStrings> = {
@@ -88,12 +89,13 @@ export const STRINGS: Record<Lang, UiStrings> = {
     imprint: "Imprint",
     privacy: "Privacy",
     intro:
-      "Every visit shows a random country — its flag, location on the map and more. Browse the list or test yourself in the quiz.",
+      "Every visit shows a random country or territory — its flag, location on the map and more. Browse the list or test yourself in the quiz.",
     score: "Score",
     moreInfo: "More info",
     wikipedia: "Read on Wikipedia",
     about: "About",
     dataAsOf: "Data as of {date}",
+    territory: "Territory",
   },
   de: {
     searchPlaceholder: "Land suchen…",
@@ -134,12 +136,13 @@ export const STRINGS: Record<Lang, UiStrings> = {
     imprint: "Impressum",
     privacy: "Datenschutz",
     intro:
-      "Jeder Aufruf zeigt ein zufälliges Land – mit Flagge, Lage auf der Karte und weiteren Informationen. Stöbere in der Liste oder teste dich im Quiz.",
+      "Jeder Aufruf zeigt ein zufälliges Land oder Gebiet – mit Flagge, Lage auf der Karte und weiteren Informationen. Stöbere in der Liste oder teste dich im Quiz.",
     score: "Punkte",
     moreInfo: "Mehr Infos",
     wikipedia: "Auf Wikipedia lesen",
     about: "Über",
     dataAsOf: "Datenstand: {date}",
+    territory: "Gebiet",
   },
   fr: {
     searchPlaceholder: "Rechercher un pays…",
@@ -180,12 +183,13 @@ export const STRINGS: Record<Lang, UiStrings> = {
     imprint: "Mentions légales",
     privacy: "Confidentialité",
     intro:
-      "Chaque visite affiche un pays au hasard — son drapeau, sa position sur la carte et d'autres informations. Parcourez la liste ou testez-vous au quiz.",
+      "Chaque visite affiche un pays ou territoire au hasard — son drapeau, sa position sur la carte et d'autres informations. Parcourez la liste ou testez-vous au quiz.",
     score: "Score",
     moreInfo: "En savoir plus",
     wikipedia: "Lire sur Wikipédia",
     about: "À propos",
     dataAsOf: "Données de {date}",
+    territory: "Territoire",
   },
   it: {
     searchPlaceholder: "Cerca un paese…",
@@ -226,12 +230,13 @@ export const STRINGS: Record<Lang, UiStrings> = {
     imprint: "Note legali",
     privacy: "Privacy",
     intro:
-      "Ogni visita mostra un paese a caso — la bandiera, la posizione sulla mappa e altre informazioni. Sfoglia l'elenco o mettiti alla prova con il quiz.",
+      "Ogni visita mostra un paese o territorio a caso — la bandiera, la posizione sulla mappa e altre informazioni. Sfoglia l'elenco o mettiti alla prova con il quiz.",
     score: "Punteggio",
     moreInfo: "Maggiori info",
     wikipedia: "Leggi su Wikipedia",
     about: "Informazioni",
     dataAsOf: "Dati aggiornati a {date}",
+    territory: "Territorio",
   },
   es: {
     searchPlaceholder: "Buscar un país…",
@@ -272,12 +277,13 @@ export const STRINGS: Record<Lang, UiStrings> = {
     imprint: "Aviso legal",
     privacy: "Privacidad",
     intro:
-      "Cada visita muestra un país al azar — su bandera, su ubicación en el mapa y más información. Explora la lista o ponte a prueba con el quiz.",
+      "Cada visita muestra un país o territorio al azar — su bandera, su ubicación en el mapa y más información. Explora la lista o ponte a prueba con el quiz.",
     score: "Puntuación",
     moreInfo: "Más información",
     wikipedia: "Leer en Wikipedia",
     about: "Acerca de",
     dataAsOf: "Datos de {date}",
+    territory: "Territorio",
   },
 };
 

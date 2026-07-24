@@ -8,8 +8,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 
+import { TERRITORY_CODES, CAPITAL_OVERRIDE, NOTES } from "./territories.mjs";
+
 const require = createRequire(import.meta.url);
 const worldCountries = require("world-countries");
+const TERRITORIES = new Set(TERRITORY_CODES);
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SPARQL_URL = "https://query.wikidata.org/sparql";
@@ -139,12 +142,17 @@ const wikipedia = await fetchWikipedia();
 console.log(`  wikipedia links: ${Object.keys(wikipedia).length} countries`);
 
 const countries = worldCountries
-  .filter((c) => c.independent === true)
+  .filter((c) => c.independent === true || TERRITORIES.has(c.cca2))
   .map((c) => {
     const iso = c.cca2;
+    const isTerritory = TERRITORIES.has(iso);
     const nativeParts = Object.values(c.name.native ?? {});
     const native = nativeParts[0]?.common ?? c.name.common;
     const capitals = pickLocalized(perLang, iso, "capital");
+    // Neutral capital for the sensitive territories, applied across languages.
+    if (CAPITAL_OVERRIDE[iso]) {
+      for (const lang of LANGS) capitals[lang] = CAPITAL_OVERRIDE[iso];
+    }
     const idd =
       c.idd?.root && c.idd.suffixes?.length === 1
         ? c.idd.root + c.idd.suffixes[0]
@@ -162,9 +170,12 @@ const countries = worldCountries
         native,
         official: c.name.official,
       },
-      capital: c.capital?.length
-        ? { ...capitals, en: capitals.en ?? c.capital[0] }
-        : { en: null, de: null, fr: null, it: null },
+      capital:
+        c.capital?.length || CAPITAL_OVERRIDE[iso]
+          ? { ...capitals, en: capitals.en ?? CAPITAL_OVERRIDE[iso] ?? c.capital[0] }
+          : { en: null, de: null, fr: null, it: null },
+      territory: isTerritory,
+      note: isTerritory ? NOTES[iso] : null,
       region: c.region,
       subregion: c.subregion || null,
       area: c.area,

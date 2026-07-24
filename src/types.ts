@@ -26,12 +26,15 @@ export interface Country {
   currencies: string[];
   callingCode: string | null;
   wikipedia: Localized;
+  territory: boolean;
+  note: Localized | null;
 }
 
 export interface MapVariant {
   sphere: string;
   graticule: string;
-  countries: { id: string; d: string }[];
+  // id null = neutral land (drawn, but not highlightable or clickable)
+  countries: { id: string | null; d: string }[];
   points: Record<string, [number, number]>;
 }
 

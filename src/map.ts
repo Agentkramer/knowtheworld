@@ -58,8 +58,11 @@ export class MapView {
       const paths = new Map<string, SVGPathElement>();
       for (const c of data.countries) {
         const p = add(c.d, "map-country");
-        p.dataset.code = c.id;
-        paths.set(c.id, p);
+        // id null = neutral land: painted, but not highlightable or clickable.
+        if (c.id) {
+          p.dataset.code = c.id;
+          paths.set(c.id, p);
+        }
       }
       this.zoomWrap.appendChild(g);
       return { g, paths, points: data.points };

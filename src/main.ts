@@ -26,9 +26,13 @@ import { MapView, type ZoomLevel } from "./map";
 import { loadScore, makeQuestion, recordAnswer, resetScore, type Question } from "./quiz";
 import { density, loadSort, saveSort, sortCountries, type SortDir, type SortKey } from "./list";
 
-const countries = countriesJson as unknown as Country[];
+const all = countriesJson as unknown as Country[];
+// Territories take part in browsing, the random deck, the list and the
+// counter — but the quiz stays on the sovereign set, since asking "the
+// capital of <disputed territory>" would read as a statehood claim.
+const sovereign = all.filter((c) => !c.territory);
 const worldMap = worldMapJson as unknown as WorldMap;
-const byCca3 = new Map(countries.map((c) => [c.cca3, c]));
+const byCca3 = new Map(all.map((c) => [c.cca3, c]));
 
 const LANG_KEY = "ktw-lang";
 const THEME_KEY = "ktw-theme";
@@ -46,7 +50,7 @@ const ZOOMS: ZoomLevel[] = ["world", "region", "subregion"];
 
 const byRegion = new Map<string, string[]>();
 const bySubregion = new Map<string, string[]>();
-for (const c of countries) {
+for (const c of all) {
   byRegion.set(c.region, [...(byRegion.get(c.region) ?? []), c.cca3]);
   if (c.subregion) bySubregion.set(c.subregion, [...(bySubregion.get(c.subregion) ?? []), c.cca3]);
 }
@@ -73,7 +77,7 @@ let mode: Mode = "explore";
 let question: Question | null = null;
 let answered = false;
 let score = loadScore();
-const deck = new Deck(countries.map((c) => c.cca3));
+const deck = new Deck(all.map((c) => c.cca3));
 
 // --- dom -----------------------------------------------------------------
 
@@ -97,6 +101,7 @@ app.innerHTML = `
     <p class="overline" id="c-region"></p>
     <h1 class="country-name" id="c-name"></h1>
     <p class="subline"><span class="native" id="c-native"></span><span class="official" id="c-official"></span></p>
+    <p class="status-note" id="c-note" hidden></p>
     <div class="panels">
       <figure class="flag-card"><img id="c-flag" alt="" /></figure>
       <div class="map-card" id="map-container"></div>
@@ -206,12 +211,23 @@ function render(c: Country): void {
   const name = countryName(c, lang);
   document.title = `${name} — Know the World`;
 
-  document.getElementById("c-region")!.textContent = [
+  const regionEl = document.getElementById("c-region")!;
+  regionEl.textContent = [
+    c.territory ? t(lang, "territory") : null,
     regionName(lang, c.region),
     c.subregion ? regionName(lang, c.subregion) : null,
   ]
     .filter(Boolean)
     .join(" · ");
+  regionEl.classList.toggle("is-territory", c.territory);
+
+  const noteEl = document.getElementById("c-note")!;
+  if (c.territory && c.note) {
+    noteEl.textContent = c.note[lang] ?? c.note.en;
+    noteEl.hidden = false;
+  } else {
+    noteEl.hidden = true;
+  }
 
   const nameEl = document.getElementById("c-name")!;
   nameEl.textContent = name;
@@ -374,7 +390,7 @@ function renderList(): void {
       .join("") +
     "</tr>";
 
-  const pool = regionFilter ? countries.filter((c) => c.region === regionFilter) : countries;
+  const pool = regionFilter ? all.filter((c) => c.region === regionFilter) : all;
   const rows = sortCountries(pool, sortKey, sortDir, lang);
 
   document.getElementById("list-body")!.innerHTML = rows
@@ -383,7 +399,9 @@ function renderList(): void {
       return `<tr data-code="${c.cca3}">
         <td class="col-rank">${i + 1}</td>
         <td class="col-flag"><img src="${import.meta.env.BASE_URL}flags/${c.cca2.toLowerCase()}.svg" alt="" loading="lazy" /></td>
-        <td class="col-name">${esc(countryName(c, lang))}</td>
+        <td class="col-name">${esc(countryName(c, lang))}${
+          c.territory ? `<span class="territory-tag">${esc(t(lang, "territory"))}</span>` : ""
+        }</td>
         <td data-label="${esc(t(lang, "capital"))}">${esc(c.capital[lang] ?? c.capital.en ?? "—")}</td>
         <td class="num" data-label="${esc(t(lang, "population"))}">${c.population ? formatNumber(lang, c.population) : "—"}</td>
         <td class="num" data-label="${esc(t(lang, "area"))} km²">${formatNumber(lang, c.area)}</td>
@@ -403,7 +421,7 @@ function optionLabel(c: Country): string {
 
 function renderQuestion(fresh: boolean): void {
   if (fresh || !question) {
-    question = makeQuestion(countries, question?.answer.cca3 ?? null);
+    question = makeQuestion(sovereign, question?.answer.cca3 ?? null);
     answered = false;
   }
   const q = question;
@@ -642,7 +660,7 @@ function updateSearch(): void {
     renderSearchResults();
     return;
   }
-  const scored = countries
+  const scored = all
     .map((c) => {
       const names = [c.name.en, c.name.de, c.name.fr, c.name.it, c.name.native].filter(
         (n): n is string => !!n,
