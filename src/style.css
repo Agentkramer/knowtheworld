@@ -36,8 +36,18 @@ a {
   padding: 1.4rem clamp(1rem, 4vw, 2.5rem) 0.6rem;
 }
 
+/* flex-basis:0 + grow lets the masthead take whatever space is left beside
+   the controls instead of demanding its full content width — so the header
+   never wraps into a zigzag in the tablet range; the intro just wraps to
+   more lines. Below the mobile breakpoint the two stack anyway. */
 .masthead {
+  flex: 1 1 0;
+  min-width: 0;
   max-width: 32rem;
+}
+
+.header-right {
+  flex: 0 0 auto;
 }
 
 .intro {
@@ -47,6 +57,43 @@ a {
   color: var(--muted);
   max-width: 30rem;
   text-wrap: pretty;
+}
+
+.intro a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.intro a:hover {
+  text-decoration: underline;
+}
+
+.wiki-link {
+  margin: clamp(1.6rem, 4vh, 2.4rem) 0 0;
+}
+
+.wiki-link[hidden] {
+  display: none;
+}
+
+.wiki-link a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--muted) 40%, transparent);
+  padding-bottom: 1px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.wiki-link a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 .header-right {
@@ -1009,7 +1056,11 @@ main {
 
 /* ---------- responsive ---------- */
 
-@media (max-width: 780px) {
+/* Up to 900px covers iPad portrait (810–834px), which otherwise falls into
+   the desktop layout and wraps the header-right block awkwardly under the
+   intro. The 12.9" iPad (1024px portrait) stays in the desktop layout, where
+   both header columns fit on one line. */
+@media (max-width: 900px) {
   .panels {
     grid-template-columns: 1fr;
   }

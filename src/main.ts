@@ -8,6 +8,7 @@ import "./themes.css";
 
 import countriesJson from "./data/countries.json";
 import worldMapJson from "./data/world-map.json";
+import metaJson from "./data/meta.json";
 import type { Country, Lang, WorldMap } from "./types";
 import {
   LANGS,
@@ -102,6 +103,7 @@ app.innerHTML = `
     </div>
     <dl class="stats" id="c-stats"></dl>
     <section class="neighbors" id="c-neighbors"></section>
+    <p class="wiki-link"><a id="c-wiki" href="#" target="_blank" rel="noopener"></a></p>
   </article>
   <section class="quiz" id="quiz-view" hidden>
     <p class="overline quiz-prompt" id="q-prompt"></p>
@@ -257,6 +259,16 @@ function render(c: Country): void {
     neighborsEl.innerHTML = `<h2>${esc(t(lang, "neighbors"))}</h2><div class="chip-row">${chips}</div>`;
   } else {
     neighborsEl.innerHTML = "";
+  }
+
+  const wiki = document.getElementById("c-wiki") as HTMLAnchorElement;
+  const wikiUrl = c.wikipedia[lang] ?? c.wikipedia.en;
+  if (wikiUrl) {
+    wiki.href = wikiUrl;
+    wiki.textContent = `${t(lang, "wikipedia")} ↗`;
+    wiki.parentElement!.hidden = false;
+  } else {
+    wiki.parentElement!.hidden = true;
   }
 
   updateBar();
@@ -486,16 +498,31 @@ function setMode(m: Mode): void {
   updateBar();
 }
 
+// "2026-07" → "July 2026" / "Juli 2026", localized to the active language.
+function formatStamp(yearMonth: string): string {
+  const [y, m] = yearMonth.split("-").map(Number);
+  if (!y || !m) return yearMonth;
+  return new Intl.DateTimeFormat(lang, { year: "numeric", month: "long" }).format(
+    new Date(y, m - 1, 1),
+  );
+}
+
 function applyStaticStrings(): void {
   searchInput.placeholder = t(lang, "searchPlaceholder");
   searchInput.setAttribute("aria-label", t(lang, "searchPlaceholder"));
   randomLabel.textContent = t(lang, "random");
-  document.getElementById("intro")!.textContent = t(lang, "intro");
+  document.getElementById("intro-text")!.textContent = `${t(lang, "intro")} `;
+  const moreLink = document.getElementById("intro-more")!;
+  moreLink.textContent = `${t(lang, "moreInfo")}…`;
   renderLangPicker();
   renderThemePicker();
   updateQuizFooter();
   document.getElementById("link-imprint")!.textContent = t(lang, "imprint");
   document.getElementById("link-privacy")!.textContent = t(lang, "privacy");
+  document.getElementById("link-about")!.textContent = t(lang, "about");
+  document.getElementById("data-stamp")!.textContent = t(lang, "dataAsOf", {
+    date: formatStamp(metaJson.generatedAt),
+  });
   resetBtn.title = t(lang, "reset");
   resetBtn.setAttribute("aria-label", t(lang, "reset"));
   renderZoomCtrl();

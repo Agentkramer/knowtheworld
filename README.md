@@ -55,10 +55,15 @@ the dataset; they come from the browser's `Intl.DisplayNames` at runtime.
   works both at `/knowtheworld/` and at the domain root — adding the custom
   domain needs no rebuild and causes no downtime. This relies on routing
   being hash-based; adding real path routes would require revisiting it.
-- **Legal pages**: `impressum.html` and `datenschutz.html` are separate
-  static pages (Vite multi-page), German and English on one page each, so
-  they stay reachable without JavaScript. They contain placeholders that
-  must be filled before going public.
+- **Standalone pages** (Vite multi-page, reachable without the app bundle):
+  `impressum.html` and `datenschutz.html` (German + English on one page);
+  `ueber.html` (About) carries all five languages and shows the one matching
+  the stored `ktw-lang`, with chips to switch. All adopt the stored theme.
+- **Wikipedia links**: per-country, per-language article URLs from Wikidata
+  sitelinks, baked into `countries.json`; the country page links to the
+  article in the active language (English fallback).
+- **Data freshness**: `build-data.mjs` writes `src/data/meta.json` with the
+  fetch month; shown localized in the footer and on the About page.
 - **Randomization**: shuffled deck (`src/deck.ts`) — every country appears once
   before any repeats; deck and seen-progress persist in `localStorage`.
 - **Map**: clickable — clicking a country jumps to it (hover shows its name);

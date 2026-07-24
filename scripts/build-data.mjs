@@ -105,6 +105,29 @@ function pickLocalized(perLangData, iso, field) {
   return out;
 }
 
+// Wikipedia article URLs per language, via Wikidata sitelinks. Missing
+// languages fall back to the English article.
+async function fetchWikipedia() {
+  const parts = LANGS.map(
+    (lang) =>
+      `OPTIONAL { ?${lang}_a schema:about ?c ; schema:isPartOf <https://${lang}.wikipedia.org/> . }`,
+  ).join("\n      ");
+  const select = LANGS.map((lang) => `(SAMPLE(?${lang}_a) AS ?${lang})`).join(" ");
+  const rows = await sparql(`
+    SELECT ?iso ${select} WHERE {
+      ?c wdt:P297 ?iso .
+      ${parts}
+    } GROUP BY ?iso`);
+  const out = {};
+  for (const r of rows) {
+    const links = {};
+    for (const lang of LANGS) links[lang] = r[lang]?.value ?? null;
+    for (const lang of LANGS) if (!links[lang]) links[lang] = links.en;
+    out[r.iso.value] = links;
+  }
+  return out;
+}
+
 console.log("Fetching Wikidata (population, founding, government, capitals)...");
 const base = await fetchBase();
 const perLang = {};
@@ -112,6 +135,8 @@ for (const lang of LANGS) {
   perLang[lang] = await fetchLang(lang);
   console.log(`  labels [${lang}]: ${Object.keys(perLang[lang]).length} countries`);
 }
+const wikipedia = await fetchWikipedia();
+console.log(`  wikipedia links: ${Object.keys(wikipedia).length} countries`);
 
 const countries = worldCountries
   .filter((c) => c.independent === true)
@@ -151,6 +176,7 @@ const countries = worldCountries
       languages: c.languages ?? {},
       currencies: Object.keys(c.currencies ?? {}),
       callingCode: idd,
+      wikipedia: wikipedia[iso] ?? { en: null, de: null, fr: null, it: null, es: null },
     };
   })
   .sort((a, b) => a.name.en.localeCompare(b.name.en));
@@ -160,12 +186,22 @@ const missing = countries.filter((c) => !c.population || !c.government.en);
 if (missing.length) {
   console.log(`  incomplete (no population or government): ${missing.map((c) => c.cca2).join(", ")}`);
 }
+const noWiki = countries.filter((c) => !c.wikipedia.en);
+if (noWiki.length) console.log(`  no Wikipedia link: ${noWiki.map((c) => c.cca2).join(", ")}`);
+
+// "YYYY-MM" — the month the data was fetched, shown as the freshness stamp.
+const generatedAt = new Date().toISOString().slice(0, 7);
 
 await fs.mkdir(path.join(ROOT, "src/data"), { recursive: true });
 await fs.writeFile(
   path.join(ROOT, "src/data/countries.json"),
   JSON.stringify(countries),
 );
+await fs.writeFile(
+  path.join(ROOT, "src/data/meta.json"),
+  JSON.stringify({ generatedAt }),
+);
+console.log(`Data stamp: ${generatedAt}`);
 
 // Copy flag SVGs (flag-icons, MIT) into public/flags/.
 const flagDir = path.join(ROOT, "public/flags");

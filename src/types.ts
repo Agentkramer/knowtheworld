@@ -25,6 +25,7 @@ export interface Country {
   languages: Record<string, string>;
   currencies: string[];
   callingCode: string | null;
+  wikipedia: Localized;
 }
 
 export interface MapVariant {
