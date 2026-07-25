@@ -1152,6 +1152,14 @@ main {
     font-size: 16px;
   }
 
+  /* The pickers sit on the left here, so their menus must open to the right
+     (left-anchored) instead of the desktop's right-anchored leftward open,
+     which would run off the left edge. */
+  .picker-menu {
+    left: 0;
+    right: auto;
+  }
+
   .toolbar {
     position: fixed;
     left: 50%;
