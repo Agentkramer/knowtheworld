@@ -26,8 +26,22 @@
     <header class="site-header">
       <div class="masthead">
         <a class="brand" href="#" id="brand">
-          <span class="brand-mark" aria-hidden="true"></span>
-          <span class="brand-name">Know the World</span>
+          <svg class="brand-logo" viewBox="0 0 40 40" aria-hidden="true">
+            <circle cx="20" cy="20" r="18" fill="var(--accent)" />
+            <g stroke="var(--bg)" stroke-width="1.6" fill="none" stroke-linecap="round">
+              <line x1="3" y1="20" x2="37" y2="20" />
+              <path d="M20 2 C29 8 29 32 20 38" />
+              <path d="M20 2 C11 8 11 32 20 38" />
+              <path d="M20 2 C24.5 8 24.5 32 20 38" />
+              <path d="M20 2 C15.5 8 15.5 32 20 38" />
+              <path d="M6.5 11 H33.5" />
+              <path d="M6.5 29 H33.5" />
+            </g>
+          </svg>
+          <span class="brand-text">
+            <span class="brand-name">Know the World</span>
+            <span class="brand-tagline">One country at a time.</span>
+          </span>
         </a>
         <p class="intro" id="intro"><span id="intro-text"></span><a href="./ueber.html" id="intro-more"></a></p>
       </div>
@@ -68,18 +82,20 @@
         </div>
 
         <nav class="toolbar" id="toolbar">
-          <div class="mode-switch" id="mode-switch"></div>
-          <button id="random-btn" class="random-btn" type="button">
-            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
-              <rect x="3.5" y="3.5" width="17" height="17" rx="4"/>
-              <circle cx="8.6" cy="8.6" r="1.4" fill="currentColor" stroke="none"/>
-              <circle cx="15.4" cy="8.6" r="1.4" fill="currentColor" stroke="none"/>
-              <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/>
-              <circle cx="8.6" cy="15.4" r="1.4" fill="currentColor" stroke="none"/>
-              <circle cx="15.4" cy="15.4" r="1.4" fill="currentColor" stroke="none"/>
-            </svg>
-            <span id="random-label">Surprise me</span>
-          </button>
+          <div class="bar-buttons">
+            <div class="mode-switch" id="mode-switch"></div>
+            <button id="random-btn" class="random-btn" type="button">
+              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+                <rect x="3.5" y="3.5" width="17" height="17" rx="4"/>
+                <circle cx="8.6" cy="8.6" r="1.4" fill="currentColor" stroke="none"/>
+                <circle cx="15.4" cy="8.6" r="1.4" fill="currentColor" stroke="none"/>
+                <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/>
+                <circle cx="8.6" cy="15.4" r="1.4" fill="currentColor" stroke="none"/>
+                <circle cx="15.4" cy="15.4" r="1.4" fill="currentColor" stroke="none"/>
+              </svg>
+              <span id="random-label">Surprise me</span>
+            </button>
+          </div>
           <p class="progress">
             <span id="progress"></span>
             <button id="reset-btn" class="reset-btn" type="button" aria-label="Reset">

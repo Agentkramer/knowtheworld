@@ -27,10 +27,8 @@ import { loadScore, makeQuestion, recordAnswer, resetScore, type Question } from
 import { density, loadSort, saveSort, sortCountries, type SortDir, type SortKey } from "./list";
 
 const all = countriesJson as unknown as Country[];
-// Territories take part in browsing, the random deck, the list and the
-// counter — but the quiz stays on the sovereign set, since asking "the
-// capital of <disputed territory>" would read as a statehood claim.
-const sovereign = all.filter((c) => !c.territory);
+// Territories are full participants: browsing, the random deck, the list, the
+// counter and the quiz.
 const worldMap = worldMapJson as unknown as WorldMap;
 const byCca3 = new Map(all.map((c) => [c.cca3, c]));
 
@@ -202,6 +200,12 @@ function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+// Sparse territories (Greenland ~0.03) would round to a misleading "0";
+// show "< 1" instead once the rounded value drops below 1.
+function densityValue(raw: number): string {
+  return Math.round(raw) < 1 ? "< 1" : formatNumber(lang, Math.round(raw));
+}
+
 function stat(label: string, value: string | null, cls = ""): string {
   if (!value) return "";
   return `<div class="stat ${cls}"><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`;
@@ -246,7 +250,7 @@ function render(c: Country): void {
   applyZoom();
 
   const density =
-    c.population && c.area ? `${formatNumber(lang, Math.round(c.population / c.area))} /km²` : null;
+    c.population && c.area ? `${densityValue(c.population / c.area)} /km²` : null;
 
   document.getElementById("c-stats")!.innerHTML = [
     stat(t(lang, "capital"), c.capital[lang] ?? c.capital.en, "stat-capital"),
@@ -405,7 +409,7 @@ function renderList(): void {
         <td data-label="${esc(t(lang, "capital"))}">${esc(c.capital[lang] ?? c.capital.en ?? "—")}</td>
         <td class="num" data-label="${esc(t(lang, "population"))}">${c.population ? formatNumber(lang, c.population) : "—"}</td>
         <td class="num" data-label="${esc(t(lang, "area"))} km²">${formatNumber(lang, c.area)}</td>
-        <td class="num" data-label="${esc(t(lang, "density"))} /km²">${d ? formatNumber(lang, Math.round(d)) : "—"}</td>
+        <td class="num" data-label="${esc(t(lang, "density"))} /km²">${d ? densityValue(d) : "—"}</td>
       </tr>`;
     })
     .join("");
@@ -421,7 +425,7 @@ function optionLabel(c: Country): string {
 
 function renderQuestion(fresh: boolean): void {
   if (fresh || !question) {
-    question = makeQuestion(sovereign, question?.answer.cca3 ?? null);
+    question = makeQuestion(all, question?.answer.cca3 ?? null);
     answered = false;
   }
   const q = question;
