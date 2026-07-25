@@ -1127,6 +1127,7 @@ main {
     gap: 0.9rem;
   }
 
+
   .masthead,
   .header-right {
     flex: 1 1 100%;
@@ -1214,6 +1215,142 @@ main {
     font-size: 0.82rem;
     padding: 0.55rem 0.85rem;
   }
+
+  /* ---------- quiz on phones ----------
+     Question, answers and Next must fit on one screen: scrolling down to the
+     Next button used to push the question out of view, and the button ended
+     up behind the floating bar. So in quiz mode the header drops what belongs
+     to browsing (intro text, search) and the toolbar drops the explore
+     counter — the quiz shows its own score right above the Next button. The
+     flag/map then flexes into whatever height is left. */
+  body[data-mode="quiz"] .intro,
+  body[data-mode="quiz"] .search,
+  body[data-mode="quiz"] .toolbar .progress {
+    display: none;
+  }
+
+  body[data-mode="quiz"] {
+    padding-bottom: 5.5rem;
+  }
+
+  body[data-mode="quiz"] main {
+    padding-top: 0.5rem;
+  }
+
+  body[data-mode="quiz"] .quiz-prompt {
+    margin-bottom: 0.9rem;
+  }
+
+  body[data-mode="quiz"] .quiz-media {
+    margin-bottom: 0.9rem;
+  }
+
+  /* The quiz claims exactly the space between header and floating bar, and
+     the flag/map absorbs whatever the fixed-height parts leave over — so it
+     fits by construction on any phone height instead of by tuned guesses. */
+  body[data-mode="quiz"] .quiz {
+    display: flex;
+    flex-direction: column;
+    /* min-height, not height: on tall screens the media grows into the space,
+       on very short ones the block may exceed it rather than squashing the
+       flag/map into something unreadable. The reserve covers the floating bar
+       plus clearance, so the score line below Next stays clear of it too. */
+    min-height: calc(100dvh - var(--header-h, 8rem) - 7.5rem);
+  }
+
+  body[data-mode="quiz"] .quiz-media {
+    flex: 1 1 auto;
+    /* Floor keeps the visual readable, ceiling stops a 4:3 flag from pushing
+       the Next button and score under the floating bar. */
+    min-height: 7rem;
+    max-height: 28dvh;
+    align-items: stretch;
+  }
+
+  /* The cards stretch to the media height as flex items. The visuals keep a
+     definite width and cap their height — width:auto here would collapse the
+     box, since the percentage height has nothing definite to resolve against.
+     object-fit / preserveAspectRatio keep them undistorted when clamped. */
+  body[data-mode="quiz"] .quiz-flag {
+    width: 100%;
+    min-height: 0;
+    padding: 0.5rem;
+  }
+
+  body[data-mode="quiz"] .quiz-flag img {
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+    object-fit: contain;
+    box-shadow: none;
+  }
+
+  body[data-mode="quiz"] .quiz-map {
+    justify-content: center;
+    min-height: 0;
+    padding: 0.35rem;
+  }
+
+  body[data-mode="quiz"] .quiz-map .world-map {
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+  }
+
+  body[data-mode="quiz"] .quiz-options {
+    gap: 0.5rem;
+  }
+
+  body[data-mode="quiz"] .quiz-option {
+    padding: 0.62rem 0.95rem;
+    font-size: 0.97rem;
+  }
+
+  body[data-mode="quiz"] .quiz-feedback {
+    margin-top: 0.7rem;
+    margin-bottom: 0;
+    font-size: 0.95rem;
+  }
+
+  body[data-mode="quiz"] .quiz-footer {
+    margin-top: 0.7rem;
+  }
+
+  /* Short phones (SE-sized, or tall ones with the browser bars showing) need
+     a little more trimming for the quiz to stay on one screen. */
+  @media (max-height: 740px) {
+    body[data-mode="quiz"] .brand-tagline {
+      display: none;
+    }
+
+    body[data-mode="quiz"] .quiz-media {
+      max-height: 20dvh;
+    }
+
+    body[data-mode="quiz"] .quiz-prompt {
+      font-size: 0.85rem;
+      margin-bottom: 0.6rem;
+    }
+
+    body[data-mode="quiz"] .quiz-option {
+      padding: 0.5rem 0.9rem;
+      font-size: 0.92rem;
+    }
+
+    body[data-mode="quiz"] .quiz-options {
+      gap: 0.4rem;
+    }
+
+    body[data-mode="quiz"] .quiz-feedback {
+      margin-top: 0.5rem;
+      min-height: 1.25em;
+    }
+
+    body[data-mode="quiz"] .quiz-footer {
+      margin-top: 0.5rem;
+    }
+  }
+
   .site-header {
     padding-top: 1rem;
   }

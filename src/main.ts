@@ -299,7 +299,22 @@ function render(c: Country): void {
   view.classList.add("enter");
 }
 
+// The mobile quiz sizes itself to the space between header and floating bar.
+// Publishing the measured header height beats hard-coding one, which would
+// drift with font size, language or a wrapped brand line.
+function syncHeaderHeight(): void {
+  const header = document.querySelector<HTMLElement>(".site-header");
+  if (header) {
+    document.documentElement.style.setProperty("--header-h", `${header.offsetHeight}px`);
+  }
+}
+window.addEventListener("resize", syncHeaderHeight);
+
 function updateBar(): void {
+  // Lets CSS react to the current view — the mobile quiz layout strips the
+  // header down so question, answers and Next fit on one screen.
+  document.body.dataset.mode = mode;
+  syncHeaderHeight();
   // One position, one meaning: the toolbar always talks about countries seen,
   // and "Surprise me" always means "random country" — so it steps aside in the
   // quiz, which brings its own Next button and score.
