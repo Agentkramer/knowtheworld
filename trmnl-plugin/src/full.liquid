@@ -1,0 +1,70 @@
+{%- comment -%}
+  Country of the day — full layout (TRMNL X 1872×1404, also fine on OG 800×480).
+
+  Selection: day-of-year → index into the 202-country array, wrapping with
+  modulo so it rotates daily and never overflows.
+
+  Map: a shared, cacheable world basemap with today's country inked on top as a
+  transparent overlay. Both SVGs share the same viewBox, so object-fit:contain
+  in the same box registers them pixel-perfect. Only data.json is polled; the
+  map geometry is served as static assets.
+{%- endcomment -%}
+{%- assign lang = lang | default: 'en' -%}
+{%- assign base = asset_base | default: 'https://www.knowtheworld.net' -%}
+{%- assign doy = 'now' | date: '%j' | minus: 1 -%}
+{%- assign idx = doy | modulo: count -%}
+{%- assign country = countries[idx] -%}
+
+<div class="layout">
+  <div class="columns">
+
+    <div class="column" style="flex: 1 1 0;">
+      <div style="position: relative; width: 100%; padding-top: 52%;">
+        <img src="{{ base }}/trmnl/basemap.svg" alt=""
+             style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;" />
+        <img src="{{ base }}/trmnl/maps/{{ country.c3 }}.svg" alt=""
+             style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;" />
+      </div>
+    </div>
+
+    <div class="column" style="flex: 1 1 0; justify-content: center; gap: var(--gap);">
+      <span class="label label--underline">{{ ui[lang].ofDay }}</span>
+
+      <span class="text--mega" style="line-height: 1;">{{ country.n[lang] }}</span>
+
+      <div class="flex flex--col gap--medium" style="width: 100%;">
+        <div class="item">
+          <div class="content">
+            <span class="value value--large">{{ country.cap[lang] }}</span>
+            <span class="label">{{ ui[lang].capital }}</span>
+          </div>
+        </div>
+        <div class="item">
+          <div class="content">
+            <span class="value value--large value--tnums">{{ country.pop }}</span>
+            <span class="label">{{ ui[lang].population }}</span>
+          </div>
+        </div>
+        <div class="item">
+          <div class="content">
+            <span class="value value--large value--tnums">{{ country.area }} km²</span>
+            <span class="label">{{ ui[lang].area }}</span>
+          </div>
+        </div>
+        <div class="item">
+          <div class="content">
+            <span class="value value--large">{{ regions[country.sr][lang] }}</span>
+            <span class="label">{{ ui[lang].region }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="title_bar">
+  <img class="image" src="{{ base }}/favicon.svg" alt="" />
+  <span class="title">Know the World</span>
+  <span class="instance">{% if country.terr == 1 %}{{ ui[lang].territory }} · {% endif %}{{ ui[lang].asOf }}</span>
+</div>

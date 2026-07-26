@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "data": "node scripts/build-data.mjs && node scripts/build-map.mjs && node scripts/build-og.mjs",
+    "data": "node scripts/build-data.mjs && node scripts/build-map.mjs && node scripts/build-trmnl.mjs && node scripts/build-og.mjs",
     "og": "node scripts/build-og.mjs"
   },
   "devDependencies": {

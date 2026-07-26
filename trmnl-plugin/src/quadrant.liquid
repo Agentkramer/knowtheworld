@@ -1,0 +1,28 @@
+{%- assign lang = lang | default: 'en' -%}
+{%- assign base = asset_base | default: 'https://www.knowtheworld.net' -%}
+{%- assign doy = 'now' | date: '%j' | minus: 1 -%}
+{%- assign idx = doy | modulo: count -%}
+{%- assign country = countries[idx] -%}
+
+<div class="layout">
+  <div class="columns">
+    <div class="column" style="flex: 2 1 0;">
+      <div style="position: relative; width: 100%; padding-top: 52%;">
+        <img src="{{ base }}/trmnl/basemap.svg" alt=""
+             style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;" />
+        <img src="{{ base }}/trmnl/maps/{{ country.c3 }}.svg" alt=""
+             style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;" />
+      </div>
+    </div>
+    <div class="column" style="flex: 3 1 0;">
+      <span class="text--large" style="line-height: 1;">{{ country.n[lang] }}</span>
+      <span class="label">{{ country.cap[lang] }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="title_bar">
+  <img class="image" src="{{ base }}/favicon.svg" alt="" />
+  <span class="title">{{ ui[lang].ofDay }}</span>
+  <span class="instance">{{ ui[lang].asOfDate }}</span>
+</div>

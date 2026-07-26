@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# trmnlp local dev config (generated; embeds polled data + localhost asset base)
+trmnl-plugin/.trmnlp.yml
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

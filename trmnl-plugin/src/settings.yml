@@ -1,0 +1,30 @@
+---
+# Know the World — TRMNL private plugin (uploaded to TRMNL).
+name: Know the World — Country of the Day
+framework_version: latest
+
+# Polling: TRMNL fetches our static JSON on a schedule (no server needed).
+# The file is ~63 KB — well under TRMNL's ~100 KB polling ceiling.
+strategy: polling
+polling_verb: GET
+polling_url: https://www.knowtheworld.net/trmnl/data.json
+polling_headers: ''
+# Content rotates once per calendar day, so a daily refresh is plenty and keeps
+# the device's battery happy. (Allowed: 15 | 60 | 360 | 720 | 1440 minutes.)
+refresh_interval: 1440
+
+no_screen_padding: 'no'
+dark_mode: 'no'
+
+custom_fields:
+- keyname: lang
+  name: Language
+  field_type: select
+  description: Language for country names, capitals and labels.
+  options:
+  - English: en
+  - Deutsch: de
+  - Français: fr
+  - Italiano: it
+  - Español: es
+  default: en
