@@ -28,3 +28,15 @@ custom_fields:
   - Italiano: it
   - Español: es
   default: en
+
+# Author / support block shown below the plugin on the marketplace.
+# NOTE: personalize the description (and add github_url / email_address if you
+# want them shown as clickable icons).
+- keyname: about
+  name: About this plugin
+  field_type: author_bio
+  description: >-
+    A new country every day — its place on the world map, capital, population,
+    area and region, in English, German, French, Italian or Spanish. Built on
+    the open geography data behind Know the World.
+  learn_more_url: https://www.knowtheworld.net

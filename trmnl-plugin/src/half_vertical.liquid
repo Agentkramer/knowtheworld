@@ -5,15 +5,13 @@
 {%- assign country = countries[idx] -%}
 
 <div class="layout">
-  <div class="column" style="justify-content: flex-start; gap: var(--gap);">
+  <div class="column">
     <span class="label label--underline">{{ ui[lang].ofDay }}</span>
-    <span class="text--mega" style="line-height: 1;">{{ country.n[lang] }}</span>
+    <span class="text--mega">{{ country.n[lang] }}</span>
 
-    <div style="position: relative; width: 100%; padding-top: 52%;">
-      <img src="{{ base }}/trmnl/basemap.svg" alt=""
-           style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;" />
-      <img src="{{ base }}/trmnl/maps/{{ country.c3 }}.svg" alt=""
-           style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;" />
+    <div class="ktw-map">
+      <img src="{{ base }}/trmnl/basemap.svg" alt="" />
+      <img src="{{ base }}/trmnl/maps/{{ country.c3 }}.svg" alt="" />
     </div>
 
     <div class="item">

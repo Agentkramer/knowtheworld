@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Know the World — TRMNL plugin icon. Atlas palette; globe + graticule
+       (echoing the site favicon) plus a location marker for "country of the day". -->
+  <rect width="512" height="512" rx="112" fill="#bc5127"/>
+  <g stroke="#f5efe2" stroke-width="11" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="256" cy="256" r="150"/>
+    <!-- equator -->
+    <line x1="106" y1="256" x2="406" y2="256"/>
+    <!-- meridians -->
+    <line x1="256" y1="106" x2="256" y2="406"/>
+    <path d="M256 106 C 336 160, 336 352, 256 406"/>
+    <path d="M256 106 C 176 160, 176 352, 256 406"/>
+    <!-- latitude lines -->
+    <line x1="119" y1="196" x2="393" y2="196"/>
+    <line x1="119" y1="316" x2="393" y2="316"/>
+  </g>
+  <!-- location marker: highlighted country of the day -->
+  <g>
+    <circle cx="330" cy="182" r="26" fill="#bc5127"/>
+    <circle cx="330" cy="182" r="20" fill="#f5efe2"/>
+    <circle cx="330" cy="182" r="8.5" fill="#221a0f"/>
+  </g>
+</svg>

@@ -14,6 +14,8 @@ dist-ssr
 
 # trmnlp local dev config (generated; embeds polled data + localhost asset base)
 trmnl-plugin/.trmnlp.yml
+# generated import archive (build artifact; rebuild from trmnl-plugin/src/)
+trmnl-plugin/*.zip
 
 # Editor directories and files
 .vscode/*

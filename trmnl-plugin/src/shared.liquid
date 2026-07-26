@@ -1,5 +1,11 @@
 {%- comment -%}
-  Each layout is self-contained (it repeats the small date→index selection
-  block), so no shared logic is required here. Kept for completeness of the
-  expected plugin file structure.
+  Shared across all layouts. The map is two stacked SVGs (static world basemap +
+  today's country overlay); they share a viewBox, so contain-fitting both in one
+  box registers them pixel-perfect. There is no Framework utility for layering
+  images, so this is the one bit of custom CSS — kept out of inline style
+  attributes per the Framework guidelines.
 {%- endcomment -%}
+<style>
+  .ktw-map { position: relative; width: 100%; padding-top: 52%; }
+  .ktw-map img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+</style>
