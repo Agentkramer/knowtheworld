@@ -4,7 +4,19 @@ name: Know the World — Country of the Day
 framework_version: latest
 
 # Polling: TRMNL fetches our static JSON on a schedule (no server needed).
-# The file is ~63 KB — well under TRMNL's ~100 KB polling ceiling.
+# The file is ~59 KB — well under TRMNL's ~100 KB polling ceiling.
+#
+# Data + asset dependency (all served from the same origin, www.knowtheworld.net,
+# a static GitHub Pages site maintained alongside this plugin):
+#   /trmnl/data.json          the polled payload: { generated, count, countries[] },
+#                             each country = { c2, c3, n{5 langs}, cap{5 langs},
+#                             r, sr, pop, area, founded, terr }
+#   /trmnl/basemap.svg        static world map, shared by every country
+#   /trmnl/maps/<cca3>.svg    per-country overlay (outline + location marker)
+#   /favicon.svg              title-bar icon
+# The maps are deliberately served as cacheable static assets rather than inlined,
+# to keep the polled payload small. If the host is unreachable the layouts still
+# render (text + fallback); only the map graphics would be missing.
 strategy: polling
 polling_verb: GET
 polling_url: https://www.knowtheworld.net/trmnl/data.json
@@ -38,5 +50,7 @@ custom_fields:
   description: >-
     A new country every day — its place on the world map, capital, population,
     area and region, in English, German, French, Italian or Spanish. Built on
-    the open geography data behind Know the World.
+    the open geography data behind Know the World (world-countries, Wikidata,
+    Natural Earth). The daily data and the map graphics are served as static
+    files from www.knowtheworld.net; nothing is tracked and no account is needed.
   learn_more_url: https://www.knowtheworld.net
