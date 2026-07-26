@@ -7,10 +7,10 @@
 <div class="layout">
   <div class="columns">
     <div class="column">
-      <div class="ktw-map">
-        <img src="{{ base }}/trmnl/basemap.svg" alt="" />
-        <img src="{{ base }}/trmnl/maps/{{ country.c3 }}.svg" alt="" />
-      </div>
+      <svg class="image image-dither w--full" viewBox="0 0 1000 520" preserveAspectRatio="xMidYMid meet">
+        <image href="{{ base }}/trmnl/basemap.svg" width="1000" height="520" />
+        <image href="{{ base }}/trmnl/maps/{{ country.c3 }}.svg" width="1000" height="520" />
+      </svg>
     </div>
     <div class="column">
       <span class="text--large">{{ country.n[lang] }}</span>
@@ -20,7 +20,7 @@
 </div>
 
 <div class="title_bar">
-  <img class="image" src="{{ base }}/favicon.svg" alt="" />
+  <img class="image image-dither" src="{{ base }}/favicon.svg" alt="" />
   <span class="title">{{ ui[lang].ofDay }}</span>
   <span class="instance">{{ ui[lang].asOfDate }}</span>
 </div>

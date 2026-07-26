@@ -1,11 +1,5 @@
 {%- comment -%}
-  Shared across all layouts. The map is two stacked SVGs (static world basemap +
-  today's country overlay); they share a viewBox, so contain-fitting both in one
-  box registers them pixel-perfect. There is no Framework utility for layering
-  images, so this is the one bit of custom CSS — kept out of inline style
-  attributes per the Framework guidelines.
+  No shared markup or styles needed: each layout is self-contained and the map
+  is a single inline SVG that stacks the basemap + overlay via its viewBox, so
+  there is no custom CSS. Kept for the expected plugin file structure.
 {%- endcomment -%}
-<style>
-  .ktw-map { position: relative; width: 100%; padding-top: 52%; }
-  .ktw-map img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
-</style>
