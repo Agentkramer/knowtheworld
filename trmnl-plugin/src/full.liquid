@@ -1,29 +1,23 @@
 {%- comment -%}
   Country of the day — full layout (TRMNL X 1872×1404, also fine on OG 800×480).
-  Selection: day-of-year → index into the 202-country array (modulo → rotates
-  daily). Map: a single inline SVG stacks the static world basemap and today's
-  country overlay via the shared viewBox — no custom CSS needed. Only data.json
-  is polled; the map geometry is served as static, cacheable assets.
+  Setup (lang, base, idx, country) comes from the shared markup. Map: a single
+  inline SVG stacks the static world basemap and today's country overlay via the
+  shared viewBox. Only data.json is polled; the map geometry is static assets.
 {%- endcomment -%}
-{%- assign lang = lang | default: 'en' -%}
-{%- assign base = asset_base | default: 'https://www.knowtheworld.net' -%}
-{%- assign doy = 'now' | date: '%j' | minus: 1 -%}
-{%- assign idx = doy | modulo: count -%}
-{%- assign country = countries[idx] -%}
-
+{%- if country -%}
 <div class="layout">
-  <div class="columns">
+  <div class="columns portrait:flex--col">
 
-    <div class="column">
+    <div class="column portrait:w--full">
       <svg class="image image-dither w--full" viewBox="0 0 1000 520" preserveAspectRatio="xMidYMid meet">
         <image href="{{ base }}/trmnl/basemap.svg" width="1000" height="520" />
         <image href="{{ base }}/trmnl/maps/{{ country.c3 }}.svg" width="1000" height="520" />
       </svg>
     </div>
 
-    <div class="column">
+    <div class="column portrait:w--full">
       <span class="label label--underline">{{ ui[lang].ofDay }}</span>
-      <span class="text--mega">{{ country.n[lang] }}</span>
+      <span class="value value--xlarge">{{ country.n[lang] }}</span>
 
       <div class="flex flex--col gap--medium w--full">
         <div class="item">
@@ -57,7 +51,17 @@
 </div>
 
 <div class="title_bar">
-  <img class="image image-dither" src="{{ base }}/favicon.svg" alt="" />
+  <img class="image" src="{{ base }}/favicon.svg" alt="" />
   <span class="title">Know the World</span>
   <span class="instance">{% if country.terr == 1 %}{{ ui[lang].territory }} · {% endif %}{{ ui[lang].asOf }}</span>
 </div>
+{%- else -%}
+<div class="layout">
+  <div class="columns">
+    <div class="column flex flex--center">
+      <span class="title title--large">Know the World</span>
+      <span class="label">No data available</span>
+    </div>
+  </div>
+</div>
+{%- endif -%}

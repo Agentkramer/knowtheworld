@@ -1,26 +1,27 @@
-{%- assign lang = lang | default: 'en' -%}
-{%- assign base = asset_base | default: 'https://www.knowtheworld.net' -%}
-{%- assign doy = 'now' | date: '%j' | minus: 1 -%}
-{%- assign idx = doy | modulo: count -%}
-{%- assign country = countries[idx] -%}
-
+{%- comment -%} Setup (lang, base, country) comes from the shared markup. {%- endcomment -%}
+{%- if country -%}
 <div class="layout">
-  <div class="columns">
-    <div class="column">
+  <div class="columns portrait:flex--col">
+    <div class="column portrait:w--full">
       <svg class="image image-dither w--full" viewBox="0 0 1000 520" preserveAspectRatio="xMidYMid meet">
         <image href="{{ base }}/trmnl/basemap.svg" width="1000" height="520" />
         <image href="{{ base }}/trmnl/maps/{{ country.c3 }}.svg" width="1000" height="520" />
       </svg>
     </div>
-    <div class="column">
-      <span class="text--large">{{ country.n[lang] }}</span>
+    <div class="column portrait:w--full">
+      <span class="value value--large">{{ country.n[lang] }}</span>
       <span class="label">{{ country.cap[lang] }}</span>
     </div>
   </div>
 </div>
 
 <div class="title_bar">
-  <img class="image image-dither" src="{{ base }}/favicon.svg" alt="" />
+  <img class="image" src="{{ base }}/favicon.svg" alt="" />
   <span class="title">{{ ui[lang].ofDay }}</span>
   <span class="instance">{{ ui[lang].asOfDate }}</span>
 </div>
+{%- else -%}
+<div class="layout"><div class="column flex flex--center">
+  <span class="title title--large">Know the World</span>
+</div></div>
+{%- endif -%}

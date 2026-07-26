@@ -1,13 +1,9 @@
-{%- assign lang = lang | default: 'en' -%}
-{%- assign base = asset_base | default: 'https://www.knowtheworld.net' -%}
-{%- assign doy = 'now' | date: '%j' | minus: 1 -%}
-{%- assign idx = doy | modulo: count -%}
-{%- assign country = countries[idx] -%}
-
+{%- comment -%} Setup (lang, base, country) comes from the shared markup. {%- endcomment -%}
+{%- if country -%}
 <div class="layout">
   <div class="column">
     <span class="label label--underline">{{ ui[lang].ofDay }}</span>
-    <span class="text--mega">{{ country.n[lang] }}</span>
+    <span class="value value--xlarge">{{ country.n[lang] }}</span>
 
     <svg class="image image-dither w--full" viewBox="0 0 1000 520" preserveAspectRatio="xMidYMid meet">
       <image href="{{ base }}/trmnl/basemap.svg" width="1000" height="520" />
@@ -24,7 +20,13 @@
 </div>
 
 <div class="title_bar">
-  <img class="image image-dither" src="{{ base }}/favicon.svg" alt="" />
+  <img class="image" src="{{ base }}/favicon.svg" alt="" />
   <span class="title">Know the World</span>
   <span class="instance">{{ ui[lang].asOfDate }}</span>
 </div>
+{%- else -%}
+<div class="layout"><div class="column flex flex--center">
+  <span class="title title--large">Know the World</span>
+  <span class="label">No data available</span>
+</div></div>
+{%- endif -%}
