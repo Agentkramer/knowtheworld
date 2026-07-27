@@ -114,13 +114,40 @@ site's data. This document is self-contained so a fresh session can start here.
   (4:3, same aspect as the 1872×1404 panel); the framework scales type via
   `value--*`/`text--*` classes, so the one `full.liquid` works on both X and OG.
 
-## Status
+## Status — shipped (2026-07-27)
+
+Built, deployed, installed on the device and **submitted to the TRMNL
+marketplace** (last review round returned only suggestions/nitpicks).
 
 - Build step: `scripts/build-trmnl.mjs` (wired into `npm run data`). Emits
-  `public/trmnl/{data.json, basemap.svg, maps/*.svg}`. Region/UI labels are
-  pulled straight from `src/i18n.ts` so wording never drifts from the site.
+  `public/trmnl/{data.json, basemap.svg, maps/*.svg}` **and generates
+  `trmnl-plugin/src/shared.liquid`** — the localized UI labels and region names
+  are baked into the shared markup (sourced from `src/i18n.ts`, so wording never
+  drifts from the site) instead of riding along in every poll. `data.json` is
+  therefore only the country array: **~59 KB**.
 - Plugin project: `trmnl-plugin/` — `src/settings.yml` (polling + `lang` select
-  de/en/fr/it/es) and `src/{full,half_horizontal,half_vertical,quadrant}.liquid`.
+  de/en/fr/it/es + an `author_bio` support block) and
+  `src/{shared,full,half_horizontal,half_vertical,quadrant}.liquid`, plus
+  `icon.svg`/`icon.png` (512²) for the marketplace listing.
+- Live: <https://www.knowtheworld.net/trmnl/data.json>, `/trmnl/basemap.svg`,
+  `/trmnl/maps/<cca3>.svg`. Purely additive — no existing page or asset changed.
+- **Importing does not update an existing plugin** — TRMNL's import always
+  creates a *new* one. Changes to a plugin that already exists must be pasted
+  into its Markup editor tabs (Shared / Full / Half Horizontal / Half Vertical /
+  Quadrant) by hand. `trmnl-plugin/know-the-world-trmnl.zip` (flat file list, no
+  `src/` folder, git-ignored build artifact) is only useful for a *first* import.
+- Markup conventions the review process settled on: no inline `style=` and no
+  `<style>` block (the map is one inline `<svg>` that stacks basemap + overlay
+  through a shared viewBox); `image image-dither` on the map but not on the
+  favicon; `value--*` for sizing (note `title--xxlarge` is only 40px, smaller
+  than `value--large`, so the country name uses `value--xlarge`);
+  `portrait:flex--col` + `portrait:w--full` to stack columns in portrait
+  (`.column` carries `width:0`, which collapses without the latter).
+- Automated review hints proved unreliable: they analyse the markup **without
+  executing the poll**, so they repeatedly reported a missing `polling_url` and
+  missing guards that were present, and suggested lines already in the file.
+  Verify against the actual files before acting on them.
+
 - **Local render recipe** (device-independent, fully verified):
   1. `node scripts/build-trmnl.mjs`
   2. Serve assets so the preview can load the maps:
@@ -136,10 +163,35 @@ site's data. This document is self-contained so a fresh session can start here.
      (image is `trmnl/trmnlp` on **Docker Hub**, not ghcr). Open
      `http://localhost:4567/full`, pick "TRMNL X" + "4 Grays".
 
-## Still open (need the user + device)
+## When the country changes — two separate clocks
 
-- Install the private plugin on the TRMNL account, set polling URL to the hosted
-  `data.json`, confirm the real X render + the external `<img>` fetches behave the
-  same server-side as in `trmnlp`.
-- Deploy: commit so `public/trmnl/*` publishes to knowtheworld.net (Vite copies
-  `public/` verbatim; assets are referenced by absolute prod URL).
+Worth understanding, because the two do **not** line up:
+
+1. **Which country is "today's"** — decided purely by the calendar, in the
+   template: `'now' | date: '%j'` (day-of-year) `| minus: 1 | modulo: 202`. So
+   the *logical* content flips at **midnight**, in whatever timezone TRMNL
+   resolves `now` in when it renders (the account timezone, Europe/Berlin here).
+   Example: day-of-year 207 → index 4 → Angola; 208 → index 5 → Antigua and
+   Barbuda.
+2. **When the screen is actually re-rendered** — decided by
+   `refresh_interval` in `settings.yml`, currently **1440** (24 h). That interval
+   counts *from the last refresh*, it is **not** aligned to midnight. A plugin
+   that last refreshed at 15:00 next refreshes around 15:00 the following day.
+
+Consequence: with a 24 h interval the new country can appear up to a full day
+late — e.g. Angola stays on screen all the next morning even though the calendar
+already moved on. This is expected behaviour, not a bug.
+
+To make the change land closer to midnight, lower `refresh_interval` (allowed:
+15 | 60 | 360 | 720 | 1440). The value is the worst-case lag after midnight:
+`360` → within 6 h (4 wake-ups/day), `60` → within an hour. Trade-off is battery
+life; the content itself only ever changes once per day.
+
+## Possible follow-ups (none blocking)
+
+- Lower `refresh_interval` so the daily change is visible sooner (see above).
+- The rotation is day-of-year based, so it restarts at index 0 every 1 January
+  and wraps once more around day 203 — countries with a low index appear twice a
+  year, the last ~20 only once. A date-seeded shuffle would spread this evenly.
+- Open review suggestions, deliberately not acted on: reusing the favicon markup
+  via a shared capture, and scaling the map viewBox per layout for the quadrant.
