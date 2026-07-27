@@ -119,6 +119,28 @@ const outCountries = countries.map((c) => {
   };
 });
 
+// --- shuffled running order ---------------------------------------------------
+// `countries` is alphabetical, which makes the daily rotation feel like reciting
+// a list. `order` is a fixed permutation of its indices, so the "shuffled" mode
+// can walk the same array in a scattered sequence. The seed is a constant on
+// purpose: reshuffling on every build would yank every installed device to a
+// different country mid-cycle.
+const SHUFFLE_SEED = 20260727;
+function mulberry32(a) {
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const rand = mulberry32(SHUFFLE_SEED);
+const order = outCountries.map((_, i) => i);
+for (let i = order.length - 1; i > 0; i--) {
+  const j = Math.floor(rand() * (i + 1));
+  [order[i], order[j]] = [order[j], order[i]];
+}
+
 // data.json is the polled payload: only the daily-changing country data. The
 // static UI labels + region names live in the plugin's shared markup instead
 // (generated below), which keeps the poll small and the labels versioned with
@@ -126,6 +148,7 @@ const outCountries = countries.map((c) => {
 const data = {
   generated: new Date().toISOString().slice(0, 10),
   count: outCountries.length,
+  order,
   countries: outCountries,
 };
 
@@ -154,7 +177,26 @@ const sharedLiquid = `{%- comment -%}
 {%- assign country_count = countries.size -%}
 {%- assign idx = 0 -%}
 {%- if countries and country_count > 0 -%}
-  {%- assign idx = 'now' | date: '%j' | minus: 1 | modulo: country_count -%}
+  {%- comment -%}
+    Day counter. With a start date set, day 0 is that date, so the sequence
+    begins at its first entry on the day the plugin is configured. Without one
+    we fall back to the day of the year, which still rotates daily.
+  {%- endcomment -%}
+  {%- assign day_number = 'now' | date: '%j' | minus: 1 -%}
+  {%- if start_date and start_date != '' -%}
+    {%- assign now_seconds = 'now' | date: '%s' | plus: 0 -%}
+    {%- assign start_seconds = start_date | date: '%s' | plus: 0 -%}
+    {%- assign elapsed = now_seconds | minus: start_seconds -%}
+    {%- assign day_number = 0 -%}
+    {%- if elapsed > 0 -%}
+      {%- assign day_number = elapsed | divided_by: 86400 -%}
+    {%- endif -%}
+  {%- endif -%}
+  {%- assign idx = day_number | modulo: country_count -%}
+  {%- comment -%} Shuffled unless the reader asked for A–Z. {%- endcomment -%}
+  {%- if sequence != 'alphabetical' and order -%}
+    {%- assign idx = order[idx] -%}
+  {%- endif -%}
 {%- endif -%}
 {%- assign country = countries[idx] -%}
 `;

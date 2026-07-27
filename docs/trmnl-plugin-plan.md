@@ -125,8 +125,8 @@ marketplace** (last review round returned only suggestions/nitpicks).
   are baked into the shared markup (sourced from `src/i18n.ts`, so wording never
   drifts from the site) instead of riding along in every poll. `data.json` is
   therefore only the country array: **~59 KB**.
-- Plugin project: `trmnl-plugin/` — `src/settings.yml` (polling + `lang` select
-  de/en/fr/it/es + an `author_bio` support block) and
+- Plugin project: `trmnl-plugin/` — `src/settings.yml` (polling + `lang`,
+  `sequence` and `start_date` fields + an `author_bio` support block) and
   `src/{shared,full,half_horizontal,half_vertical,quadrant}.liquid`, plus
   `icon.svg`/`icon.png` (512²) for the marketplace listing.
 - Live: <https://www.knowtheworld.net/trmnl/data.json>, `/trmnl/basemap.svg`,
@@ -167,31 +167,38 @@ marketplace** (last review round returned only suggestions/nitpicks).
 
 Worth understanding, because the two do **not** line up:
 
-1. **Which country is "today's"** — decided purely by the calendar, in the
-   template: `'now' | date: '%j'` (day-of-year) `| minus: 1 | modulo: 202`. So
-   the *logical* content flips at **midnight**, in whatever timezone TRMNL
-   resolves `now` in when it renders (the account timezone, Europe/Berlin here).
-   Example: day-of-year 207 → index 4 → Angola; 208 → index 5 → Antigua and
-   Barbuda.
-2. **When the screen is actually re-rendered** — decided by
-   `refresh_interval` in `settings.yml`, currently **1440** (24 h). That interval
-   counts *from the last refresh*, it is **not** aligned to midnight. A plugin
-   that last refreshed at 15:00 next refreshes around 15:00 the following day.
+1. **Which country is "today's"** — decided purely by the calendar, in the shared
+   markup. With a **`start_date`** set (a `date` field, `default: today`, so it
+   pre-fills with the setup day), day 0 is that date:
+   `('now' - start_date) / 86400 | modulo: 202`. Without one it falls back to the
+   day of the year. The resulting index is then mapped through the `order`
+   permutation unless `sequence` is `alphabetical`. The *logical* content flips
+   at **midnight**, in whatever timezone TRMNL resolves `now` in when it renders
+   (the account timezone).
+2. **When the screen is actually re-rendered** — decided by `refresh_interval`
+   in `settings.yml`, now **360** (6 h). That interval counts *from the last
+   refresh*, it is **not** aligned to midnight, so its value is the worst-case
+   lag before a new country appears. It was 1440 initially, which is why a
+   country could linger on screen for most of the following day.
+   (Allowed: 15 | 60 | 360 | 720 | 1440.)
 
-Consequence: with a 24 h interval the new country can appear up to a full day
-late — e.g. Angola stays on screen all the next morning even though the calendar
-already moved on. This is expected behaviour, not a bug.
+### Order and start date
 
-To make the change land closer to midnight, lower `refresh_interval` (allowed:
-15 | 60 | 360 | 720 | 1440). The value is the worst-case lag after midnight:
-`360` → within 6 h (4 wake-ups/day), `60` → within an hour. Trade-off is battery
-life; the content itself only ever changes once per day.
+- `scripts/build-trmnl.mjs` emits an `order` array: a Fisher–Yates permutation of
+  the 202 indices from a **fixed seed** (`SHUFFLE_SEED`). The seed is constant on
+  purpose — reshuffling on every build would yank every installed device to a
+  different country mid-cycle.
+- `sequence` (select, default `shuffled`) switches between that permutation and
+  plain A–Z. `start_date` (date, optional) sets day one.
+- Verified in `trmnlp` (2026-07-27, 202 countries): start = today + shuffled →
+  day 0 → New Zealand; start = 5 days earlier + shuffled → day 5 → Greenland;
+  start = today + A–Z → index 0 → Afghanistan; no start date + A–Z → day-of-year
+  208 → index 5 → Antigua and Barbuda.
+- Because the counter is now days-since-start rather than day-of-year, the
+  sequence walks all 202 countries once before repeating, instead of restarting
+  every 1 January and wrapping again around day 203.
 
 ## Possible follow-ups (none blocking)
 
-- Lower `refresh_interval` so the daily change is visible sooner (see above).
-- The rotation is day-of-year based, so it restarts at index 0 every 1 January
-  and wraps once more around day 203 — countries with a low index appear twice a
-  year, the last ~20 only once. A date-seeded shuffle would spread this evenly.
 - Open review suggestions, deliberately not acted on: reusing the favicon markup
   via a shared capture, and scaling the map viewBox per layout for the quadrant.

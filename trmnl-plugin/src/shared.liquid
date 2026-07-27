@@ -16,6 +16,25 @@
 {%- assign country_count = countries.size -%}
 {%- assign idx = 0 -%}
 {%- if countries and country_count > 0 -%}
-  {%- assign idx = 'now' | date: '%j' | minus: 1 | modulo: country_count -%}
+  {%- comment -%}
+    Day counter. With a start date set, day 0 is that date, so the sequence
+    begins at its first entry on the day the plugin is configured. Without one
+    we fall back to the day of the year, which still rotates daily.
+  {%- endcomment -%}
+  {%- assign day_number = 'now' | date: '%j' | minus: 1 -%}
+  {%- if start_date and start_date != '' -%}
+    {%- assign now_seconds = 'now' | date: '%s' | plus: 0 -%}
+    {%- assign start_seconds = start_date | date: '%s' | plus: 0 -%}
+    {%- assign elapsed = now_seconds | minus: start_seconds -%}
+    {%- assign day_number = 0 -%}
+    {%- if elapsed > 0 -%}
+      {%- assign day_number = elapsed | divided_by: 86400 -%}
+    {%- endif -%}
+  {%- endif -%}
+  {%- assign idx = day_number | modulo: country_count -%}
+  {%- comment -%} Shuffled unless the reader asked for A–Z. {%- endcomment -%}
+  {%- if sequence != 'alphabetical' and order -%}
+    {%- assign idx = order[idx] -%}
+  {%- endif -%}
 {%- endif -%}
 {%- assign country = countries[idx] -%}
