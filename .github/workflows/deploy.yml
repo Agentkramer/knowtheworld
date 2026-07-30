@@ -3,6 +3,16 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # TRMNL only re-renders a polling plugin when the fetched payload changes
+  # ("if the data has not changed then the screen will not be generated"). Our
+  # trmnl/data.json is static, so without this it would never refresh and the
+  # "country of the day" would freeze until a manual Force Refresh. Rebuilding on
+  # a schedule re-stamps data.json's `generated` date, which is the daily change
+  # that lets TRMNL regenerate the screen. Twice daily so a single failed run
+  # doesn't freeze the plugin for a whole day; the country still only changes
+  # once per (UTC) day because `generated` is date-only.
+  schedule:
+    - cron: "5 0,12 * * *"
   workflow_dispatch:
 
 permissions:
@@ -24,6 +34,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Re-stamp trmnl/data.json with today's date (self-contained: reads only
+      # committed src/data + src/i18n.ts, no external APIs) so each deploy —
+      # scheduled or on push — publishes a payload that differs from yesterday's.
+      - run: node scripts/build-trmnl.mjs
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

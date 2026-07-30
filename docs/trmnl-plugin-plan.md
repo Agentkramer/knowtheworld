@@ -163,24 +163,56 @@ marketplace** (last review round returned only suggestions/nitpicks).
      (image is `trmnl/trmnlp` on **Docker Hub**, not ghcr). Open
      `http://localhost:4567/full`, pick "TRMNL X" + "4 Grays".
 
-## When the country changes — two separate clocks
+## When the country changes — and the render-dedup trap (important)
 
-Worth understanding, because the two do **not** line up:
+Three things gate when a new country appears, and the third one bit us:
 
 1. **Which country is "today's"** — decided purely by the calendar, in the shared
    markup. With a **`start_date`** set (a `date` field, `default: today`, so it
    pre-fills with the setup day), day 0 is that date:
    `('now' - start_date) / 86400 | modulo: 202`. Without one it falls back to the
-   day of the year. The resulting index is then mapped through the `order`
-   permutation unless `sequence` is `alphabetical`. The *logical* content flips
-   at **midnight**, in whatever timezone TRMNL resolves `now` in when it renders
-   (the account timezone).
-2. **When the screen is actually re-rendered** — decided by `refresh_interval`
-   in `settings.yml`, now **360** (6 h). That interval counts *from the last
-   refresh*, it is **not** aligned to midnight, so its value is the worst-case
-   lag before a new country appears. It was 1440 initially, which is why a
-   country could linger on screen for most of the following day.
-   (Allowed: 15 | 60 | 360 | 720 | 1440.)
+   day of the year. The index is then mapped through the `order` permutation
+   unless `sequence` is `alphabetical`.
+2. **`refresh_interval`** in `settings.yml` (**360** = 6 h) — how often TRMNL
+   *polls* our URL. It is not midnight-aligned. (Allowed: 15 | 60 | 360 | 720 |
+   1440.)
+3. **TRMNL only re-renders when the polled payload changed.** From the TRMNL
+   docs: *"When TRMNL syncs content, but it matches the previously synced content
+   (from 15+ minutes ago), the system stops and does not re-render."* There is no
+   markup flag to force it (`TRMNL_SKIP_SCREEN_GENERATION` only *skips*).
+
+### The trap
+
+`data.json` was a **static file** — byte-identical every day. The country is
+chosen at *render* time from `now`, but TRMNL never re-rendered, because the
+*synced data* never changed. Result: the plugin froze on one country for days;
+only saving the settings (a forced Force-Refresh) advanced it. Polling the URL
+more often does nothing — polling is not rendering.
+
+### The fix (deploy pipeline, not markup)
+
+The daily change has to live in the *payload*. `.github/workflows/deploy.yml`
+now runs `node scripts/build-trmnl.mjs` on every deploy **and on a
+`schedule: cron` ("5 0,12 * * *", twice daily)**. That re-stamps
+`data.json`'s `generated` field with the current UTC date, so once per UTC day
+the polled payload differs → TRMNL re-renders → the shared markup recomputes the
+correct country. `generated` is date-only, so the extra midday run is just a
+safety net (a same-date payload is identical → no wasted render). The build step
+is self-contained (reads only committed `src/data` + `src/i18n.ts`, no external
+APIs), so the daily job can't be broken by an upstream outage.
+
+Consequences to remember:
+- The country effectively flips shortly after **00:00 UTC** (+ the device's own
+  poll latency), not at the viewer's local midnight — a UTC-date heartbeat can't
+  flip earlier than UTC midnight. For Berlin that's ~01:00–02:00 local; fine for
+  a morning display. Timezones far ahead of UTC see up to ~a day's lag worst
+  case. Acceptable for a once-a-day e-ink screen.
+- **Sub-daily rotation was considered and declined** (2026-07-30). A per-user
+  interval field can only change the Liquid counter speed; the *re-render*
+  cadence is global and bounded by the heartbeat + `refresh_interval`. Supporting
+  e.g. 4 h would force hourly polling for everyone (no native 4 h tier) and a
+  4×–6× daily deploy, disproportionate for a "country of the day" display. Kept
+  daily-only.
 
 ### Order and start date
 
