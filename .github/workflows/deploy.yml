@@ -7,10 +7,12 @@ on:
   # ("if the data has not changed then the screen will not be generated"). Our
   # trmnl/data.json is static, so without this it would never refresh and the
   # "country of the day" would freeze until a manual Force Refresh. Rebuilding on
-  # a schedule re-stamps data.json's `generated` date, which is the daily change
-  # that lets TRMNL regenerate the screen. Twice daily so a single failed run
-  # doesn't freeze the plugin for a whole day; the country still only changes
-  # once per (UTC) day because `generated` is date-only.
+  # a schedule re-stamps data.json's `tick` heartbeat (AM/PM per UTC day), which
+  # is the change that lets TRMNL regenerate the screen. Twice daily (00:05 and
+  # 12:05 UTC): the midnight run flips the country for the eastern hemisphere in
+  # its morning, the midday run does the same for the Americas — and it doubles
+  # as a retry if one run fails. The country itself still changes once per local
+  # day (the shared markup derives it from the account timezone's `now`).
   schedule:
     - cron: "5 0,12 * * *"
   workflow_dispatch:

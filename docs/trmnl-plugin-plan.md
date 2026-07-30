@@ -193,20 +193,26 @@ more often does nothing — polling is not rendering.
 
 The daily change has to live in the *payload*. `.github/workflows/deploy.yml`
 now runs `node scripts/build-trmnl.mjs` on every deploy **and on a
-`schedule: cron` ("5 0,12 * * *", twice daily)**. That re-stamps
-`data.json`'s `generated` field with the current UTC date, so once per UTC day
-the polled payload differs → TRMNL re-renders → the shared markup recomputes the
-correct country. `generated` is date-only, so the extra midday run is just a
-safety net (a same-date payload is identical → no wasted render). The build step
-is self-contained (reads only committed `src/data` + `src/i18n.ts`, no external
+`schedule: cron` ("5 0,12 * * *", twice daily)**. That re-stamps `data.json`'s
+`tick` heartbeat — `YYYY-MM-DD-AM|PM` by UTC hour — so the polled payload
+differs twice a UTC day → TRMNL re-renders → the shared markup recomputes the
+correct country (from the account timezone's `now`). The build step is
+self-contained (reads only committed `src/data` + `src/i18n.ts`, no external
 APIs), so the daily job can't be broken by an upstream outage.
 
+Why twice a day (AM/PM) rather than once: a single 00:00 UTC render lands the
+new country in the morning east of UTC but only in the *evening* for the
+Americas (their local midnight is 04:00–08:00 UTC, after the render, so they
+wait until the next day's render). The 12:05 UTC run gives the western
+hemisphere its own post-midnight re-render, so everyone gets the change in their
+morning. The extra render is a harmless duplicate where the country hasn't
+changed. It also doubles as a retry if one run fails.
+
 Consequences to remember:
-- The country effectively flips shortly after **00:00 UTC** (+ the device's own
-  poll latency), not at the viewer's local midnight — a UTC-date heartbeat can't
-  flip earlier than UTC midnight. For Berlin that's ~01:00–02:00 local; fine for
-  a morning display. Timezones far ahead of UTC see up to ~a day's lag worst
-  case. Acceptable for a once-a-day e-ink screen.
+- The country still only advances **once per local day**; the two heartbeats are
+  just two render opportunities, not two countries.
+- `tick` is a heartbeat only — the templates never read it; its sole job is to
+  differ so TRMNL doesn't dedupe the render away.
 - **Sub-daily rotation was considered and declined** (2026-07-30). A per-user
   interval field can only change the Liquid counter speed; the *re-render*
   cadence is global and bounded by the heartbeat + `refresh_interval`. Supporting

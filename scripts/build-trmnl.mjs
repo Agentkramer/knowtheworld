@@ -145,8 +145,19 @@ for (let i = order.length - 1; i > 0; i--) {
 // static UI labels + region names live in the plugin's shared markup instead
 // (generated below), which keeps the poll small and the labels versioned with
 // the templates.
+//
+// `tick` is a render heartbeat: TRMNL only regenerates a screen when the polled
+// payload changes, so a static file would freeze the rotation. It changes twice
+// a UTC day (AM/PM), driven by the deploy cron — enough that viewers west of UTC
+// get the new country in their morning rather than their evening, without making
+// the payload change so often that TRMNL re-renders needlessly. Not used by the
+// templates; its only job is to differ.
+const nowUtc = new Date();
+const generated = nowUtc.toISOString().slice(0, 10);
+const tick = `${generated}-${nowUtc.getUTCHours() < 12 ? "AM" : "PM"}`;
 const data = {
-  generated: new Date().toISOString().slice(0, 10),
+  generated,
+  tick,
   count: outCountries.length,
   order,
   countries: outCountries,
