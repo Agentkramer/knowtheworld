@@ -220,6 +220,30 @@ Consequences to remember:
   4×–6× daily deploy, disproportionate for a "country of the day" display. Kept
   daily-only.
 
+### Reading form fields — the second dedup-class trap
+
+Custom field values are **not** top-level Liquid variables on the platform. They
+live under `trmnl.plugin_settings.custom_fields_values.<keyname>`. Reading a bare
+`{{ lang }}` compiles and renders fine — it just silently resolves to nil, so
+every field falls back to its default. Symptom: language stays English, order
+stays shuffled, start date is ignored, all at once, with no error anywhere.
+
+`shared.liquid` therefore reads the platform path first and falls back to the
+bare name (which is all `trmnlp` provides locally):
+
+```liquid
+{%- assign cfv = trmnl.plugin_settings.custom_fields_values -%}
+{%- assign lang = cfv.lang | default: lang | default: 'en' -%}
+```
+
+**Testing lesson:** the original `trmnlp` check passed because the values were
+injected as top-level `variables:` — i.e. it exercised the one path the platform
+never uses. When verifying form fields locally, put them under
+`variables.trmnl.plugin_settings.custom_fields_values` to mirror the device.
+Verified 2026-08-03 in all three shapes: platform path (de + alphabetical +
+start date → Chad, day 33), top-level (fr + shuffled → Bolivie, day 9), and
+nothing set (defaults → Colombia, en, shuffled).
+
 ### Order and start date
 
 - `scripts/build-trmnl.mjs` emits an `order` array: a Fisher–Yates permutation of

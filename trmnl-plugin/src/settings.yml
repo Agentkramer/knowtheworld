@@ -47,22 +47,17 @@ custom_fields:
 - keyname: sequence
   name: Order
   field_type: select
-  description: >-
-    Shuffled mixes the countries up; A–Z walks them in alphabetical order.
-    Either way you get exactly one country per day.
   options:
-  - Shuffled: shuffled
-  - 'A–Z': alphabetical
-  default: shuffled
+  - "shuffled"
+  - "alphabetical"
+  default: "shuffled"
+  description: shuffled displays countries in a randomized order (but no country twice); alphabetical displays them from Afghanistan to Zimbabwe. Once through, the sequence starts again.
 
 - keyname: start_date
   name: Start date
   field_type: date
-  optional: true
-  description: >-
-    Day one of the sequence — defaults to the day you set this plugin up. Leave
-    it empty to derive the country from the day of the year instead.
   default: today
+  description: Day one of the sequence — defaults to the day you set this plugin up. Leave it empty to derive the country from the day of the year instead.
 
 # Author / support block shown below the plugin on the marketplace.
 # NOTE: personalize the description (and add github_url / email_address if you
@@ -77,3 +72,4 @@ custom_fields:
     Natural Earth). The daily data and the map graphics are served as static
     files from www.knowtheworld.net; nothing is tracked and no account is needed.
   learn_more_url: https://www.knowtheworld.net
+  category: education

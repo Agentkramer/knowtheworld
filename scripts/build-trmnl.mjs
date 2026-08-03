@@ -183,7 +183,18 @@ const sharedLiquid = `{%- comment -%}
 {%- assign ui = ui_json | parse_json -%}
 {%- capture regions_json -%}${JSON.stringify(regions)}{%- endcapture -%}
 {%- assign regions = regions_json | parse_json -%}
-{%- assign lang = lang | default: 'en' -%}
+{%- comment -%}
+  Form field values live under trmnl.plugin_settings.custom_fields_values on the
+  platform. The bare names (lang, sequence, start_date) only exist as trmnlp's
+  local variables, so read the platform path first and fall back to the bare
+  name — that keeps local previews working and is why this must never be
+  simplified to just {{ lang }}: on a real device every field would silently
+  fall back to its default.
+{%- endcomment -%}
+{%- assign cfv = trmnl.plugin_settings.custom_fields_values -%}
+{%- assign lang = cfv.lang | default: lang | default: 'en' -%}
+{%- assign sequence = cfv.sequence | default: sequence | default: 'shuffled' -%}
+{%- assign start_date = cfv.start_date | default: start_date -%}
 {%- assign base = asset_base | default: 'https://www.knowtheworld.net' -%}
 {%- assign country_count = countries.size -%}
 {%- assign idx = 0 -%}
